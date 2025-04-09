@@ -10,119 +10,9 @@ from langchain_core.memory import BaseMemory
 import json
 from typing import List, Dict, Any
 import faiss  # make faiss available
-
-# from langchain.vectorstores import FAISS
-# from langchain.docstore import InMemoryDocstore
 from sentence_transformers import SentenceTransformer
 from typing import ClassVar, TypeVar
-
-
-class CounterMemory(BaseMemory):
-    # The key is user id
-    ## for every user I store a tuple of last counter and last timestamdp
-    user_level_memories: Dict[str, Any] = dict()
-
-    # The key is Attack pattern hash
-    ## for every pattern I store a tuple of last counter and last timestamd
-    usage_pattern_memories: Dict[str, Any] = dict()
-    sft_name: ClassVar[str] = "all-MiniLM-L6-v2"
-    sentence_tf: ClassVar[SentenceTransformer] = SentenceTransformer(sft_name)
-    doc_embd: ClassVar = sentence_tf.encode("Hello")
-    print("Doc embedding shape: ", doc_embd.shape)
-    size_embd: ClassVar = doc_embd.shape[0]
-    # faiss_index: TypeVar = faiss.normalize_L2(doc_embd)
-    faiss_index: TypeVar = faiss.IndexFlatL2(size_embd)
-
-    # vector_store = FAISS(
-    #    embedding_function=sentence_tf,
-    #    index=faiss_index,
-    #    docstore=InMemoryDocstore(),
-    #    index_to_docstore_id={},
-    # )
-
-    @property
-    def memory_variables(self) -> List[str]:
-        return list(self.user_level_memories.keys())
-
-    def search(self, text, k=1, threshold=0.2) -> list:
-        decision = False
-        # results, scores = self.vector_store.similarity_search_with_score(text, k=k)
-        doc_embd = self.sentence_tf.encode([text])
-        results, indices = self.faiss_index.search(doc_embd, k)
-        top_score = results[0][0]
-        top_i = indices[0][0]
-        print("Current top score: ", top_score)
-        print("Current top index: ", top_i)
-        print("Current threshold: ", threshold)
-        ##############
-        ##############
-        if top_score > threshold:
-            decision = True
-        return {
-            "score": float(top_score),
-            "bucket_index_id": f"{top_i}",
-            "decision": decision,
-        }
-
-    def add_document_to_search_store(self, text):
-        doc_embd = self.sentence_tf.encode([text])
-        print(len(doc_embd))
-        print(f"Adding document to search store {text}")
-        self.faiss_index.add(doc_embd)
-
-    def add_counter(self, user_id, message=None):
-        if user_id not in self.user_level_memories:
-            self.user_level_memories[user_id] = 0
-        my_threshold = 0.0
-        if message:
-            pattern_result = self.search(message, threshold=my_threshold)
-            print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-            print(pattern_result)
-            index_id = f"{pattern_result['bucket_index_id']}"
-            if not pattern_result["decision"] or index_id == "-1":
-                ### New Document
-                self.add_document_to_search_store(message)
-                doc_added_result = self.search(message, threshold=-1)
-                self.usage_pattern_memories[index_id] = 1
-                print("I should have added the document and it should be the first one")
-            else:
-                self.usage_pattern_memories[index_id] += 1
-        ##############
-
-        self.user_level_memories[user_id] += 1
-
-    def get_message_count(self, user_id):
-        return self.user_level_memories.get(user_id, 0)
-
-    def load_memory_variables(self):
-        user_json_file = "user_memories.json"
-        if os.path.exists(user_json_file):
-            with open(user_json_file, "r") as f:
-                self.user_level_memories = json.load(f)
-        pattern_json_file = "pattern_memories.json"
-        if os.path.exists(pattern_json_file):
-            with open(pattern_json_file, "r") as f:
-                self.usage_pattern_memories = json.load(f)
-        faiss_file = "faiss_index.bin"
-        if os.path.exists(faiss_file):
-            self.faiss_index = faiss.read_index(faiss_file)
-
-    def save_context(self):
-        json_file = "user_memories.json"
-        with open(json_file, "w") as f:
-            json.dump(self.user_level_memories, f)
-        pattern_json_file = "pattern_memories.json"
-        with open(pattern_json_file, "w") as f:
-            json.dump(self.usage_pattern_memories, f)
-        faiss_file = "faiss_index.bin"
-        faiss.write_index(self.faiss_index, faiss_file)
-
-    def clear(self):
-        self.usage_pattern_memories = {}
-        self.user_level_memories = {}
-        self.faiss_index.reset()
-
-
+from memory_aware import MemoryAware, seed_index
 from .state import OutputState, AgentState, Message, Type as MsgType
 
 # Initialize the Azure OpenAI model
@@ -211,41 +101,39 @@ def convert_messages(messages: list) -> list[BaseMessage]:
 def extract_last_human_message(messages: list) -> str:
     for m in reversed(messages):
         if isinstance(m, Message):
-            if m.type == MsgType.human:
+            if m.type == MsgType.human and m.content.lower() != "ok":
                 return m.content
         if isinstance(m, dict):
-            if m.get("type", "") == "human":
+            if m.get("type", "") == "human" and m.get("content", "").lower() != "ok":
                 return m.get("content", "")
     return None
 
 
 # Define mail_agent function
-def email_agent(state: AgentState) -> OutputState | AgentState:
+def analyze_history(state: AgentState) -> OutputState | AgentState:
     """This agent is a skilled writer for a marketing company, creating formal and professional emails for publicity campaigns.
     It interacts with users to gather the necessary details.
     Once the user approves by sending "is_completed": true, the agent outputs the finalized email in "final_email".
     """
     # Load memory
-    memory = CounterMemory()
+    memory = MemoryAware()
     memory.load_memory_variables()
+    memory.faiss_index = seed_index(memory.faiss_index, memory.sentence_tf)
 
     user_id = state.user_id
     # Check subsequent messages and handle completion
     if state.is_completed:
-        print(state.messages[-1].content)
-        for m in state.messages:
-            print(m)
-        print("End of conversation")
         ##############
-        memory.add_counter(user_id, message=state.messages[-1].content)
+        last_human_message = extract_last_human_message(state.messages)
+        if last_human_message:
+            print("Last human message: ", last_human_message)
+            memory.add_counter(user_id, last_human_message)
         final_mail = extract_mail(state.messages)
         output_state: OutputState = OutputState(
             messages=state.messages,
             is_completed=state.is_completed,
             final_email=final_mail,
         )
-        match_result = memory.search(state.messages[-1].content or "", k=1)
-        print(match_result)
         memory.save_context()
         return output_state
 
@@ -268,10 +156,10 @@ def email_agent(state: AgentState) -> OutputState | AgentState:
 
 # Create the graph and add the agent node
 graph_builder = StateGraph(AgentState, output=OutputState)
-graph_builder.add_node("email_agent", email_agent)
+graph_builder.add_node("analyze_history", analyze_history)
 
-graph_builder.add_edge(START, "email_agent")
-graph_builder.add_edge("email_agent", END)
+graph_builder.add_edge(START, "analyze_history")
+graph_builder.add_edge("analyze_history", END)
 
 # Compile the graph
 graph = graph_builder.compile()
