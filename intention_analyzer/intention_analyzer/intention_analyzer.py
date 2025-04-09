@@ -75,6 +75,14 @@ def intention_analyzer_agent(state: AgentState) -> OutputState | AgentState:
     Once the user approves by sending "is_completed": true, the agent outputs the final intent in "final_intent".
     """
 
+    # Generate the intention.
+    llm_messages = [
+        Message(type=MsgType.human, content= INTENTION_ANALYZER_PROMPT_TEMPLATE.format()),
+    ] + (state.messages or [])
+    
+    llm_output = str(llm.invoke(convert_messages(llm_messages)).content)
+    state.messages = (state.messages or []) + [Message(type=MsgType.ai, content=llm_output)]
+
     # Check subsequent messages and handle completion
     if state.is_completed:
         final_intent = extract_final_intent(state.messages)
@@ -85,13 +93,6 @@ def intention_analyzer_agent(state: AgentState) -> OutputState | AgentState:
             final_intent=final_intent)
         return output_state
 
-    # Generate the intention.
-    llm_messages = [
-        Message(type=MsgType.human, content= INTENTION_ANALYZER_PROMPT_TEMPLATE.format()),
-    ] + (state.messages or [])
-    
-    llm_output = str(llm.invoke(convert_messages(llm_messages)).content)
-    state.messages = (state.messages or []) + [Message(type=MsgType.ai, content=llm_output)]
     return state
 
 # Create the graph and add the agent node
