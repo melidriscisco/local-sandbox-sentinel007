@@ -11,6 +11,7 @@ from intention_analyzer.state import Message, Type as MsgType
 
 def main():
     output = OutputState(messages=[], final_email=None)
+    user_id = input("Please Enter your user id >>> ")
     while True:
         if output.messages and len(output.messages) > 0:
             m = output.messages[-1]
@@ -18,10 +19,10 @@ def main():
         if output.final_email:
             break
         message = input("YOU [Type OK when you are happy with the email proposed] >>> ")
-
         nextinput = AgentState(
+            user_id=user_id,
             messages=(output.messages or [])
-            + [Message(content=message, type=MsgType.human)]
+            + [Message(content=message, type=MsgType.human)],
         )
         if message == "OK":
             nextinput.is_completed = True
