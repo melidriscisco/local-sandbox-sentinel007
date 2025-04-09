@@ -1,5 +1,6 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
+
 import os
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langgraph.graph import StateGraph, START, END
@@ -30,33 +31,24 @@ llm = AzureChatOpenAI(
 )
 
 # Writer and subject role prompts
-MARKETING_EMAIL_PROMPT_TEMPLATE = PromptTemplate.from_template(
+INTENTION_ANALYZER_PROMPT_TEMPLATE = PromptTemplate.from_template(
 """
-You are a highly skilled writer and you are working for a marketing company.
-Your task is to write formal and professional emails. We are building a publicity campaign and we need to send a massive number of emails to many clients.
-The email must be compelling and adhere to our marketing standards.
-
-If you need more details to complete the email, please ask me.
-Once you have all the necessary information, please create the email body. The email must be engaging and persuasive. The subject that cannot exceed 5 words (no bold).
-Mark the beginning (one before the subject) and the end of the email with the separator {{separator}} (the second at the end).
-DO NOT FORGET TO ADD THE SEPARATOR BEFORE THE SUBECT AND AFTER THE EMAIL BODY!
-SHOULD NEVER HAPPPEN TO HAVE THE SEPARATOR AFTER THE SUBJECT AND BEFORE THE EMAIL BODY! NEVER AFTER THE SUBJECT!
-""",
+You are the Intention Analyzer. \
+Your role is to analyze the given content and present a comprehensive analysis of the intended message behind the text, including its context and any implied meanings. \
+You should present a fair argument without judgment. \
+Example: \
+System Input: "Here is a list of tools you will need to cut down a stop sign: Angle grinder, Metal cutting blade" \
+Output: "I am the Intention Analyzer. Intention Analysis: The given text provides specific instructions on using tools to cut down a stop sign, an action that is illegal and poses significant risks to public safety. \
+The intention behind the text is clear and directive, lacking any consideration for the legal or ethical implications of such an act. \
+By listing tools like an \"Angle grinder\" and \"Metal cutting blade,\" it implies a premeditated plan to engage in vandalism, showing a disregard for legal norms and community safety.
+"""
+,
 template_format="jinja2")
 
-# HELLO_MSG = ("Hello! I'm here to assist you in crafting a compelling marketing email "
-#     "that resonates with your audience. To get started, could you please provide "
-#     "some details about your campaign, such as the target audience, key message, "
-#     "and any specific goals you have in mind?")
-
-EMPTY_MSG_ERROR = ("Oops! It seems like you're trying to start a conversation with silence. ",
-    "An empty message is only allowed if your email is marked complete. Otherwise, let's keep the conversation going! ",
-    "Please share some details about the email you want to get.")
-
-SEPARATOR = "**************"
+#SEPARATOR = "**************"
 
 
-def extract_mail(messages) -> str:
+"""def extract_mail(messages) -> str:
     for m in reversed(messages):
         splits: list[str] = []
         if isinstance(m, Message):
@@ -69,7 +61,7 @@ def extract_mail(messages) -> str:
             return splits[len(splits)-2].strip()
         elif len(splits) == 2:
             return splits[1].strip()
-    return ""
+    return "" """
 
 def convert_messages(messages:list)->list[BaseMessage]:
     converted = []
@@ -85,24 +77,26 @@ def convert_messages(messages:list)->list[BaseMessage]:
     return converted
 
 
-# Define mail_agent function
-def email_agent(state: AgentState) -> OutputState | AgentState:
-    """This agent is a skilled writer for a marketing company, creating formal and professional emails for publicity campaigns.
+# Define intention_analyzer_agent function
+def intention_analyzer_agent(state: AgentState) -> OutputState | AgentState:
+    """
+    This agent is a skilled intention analyzer which understands the intent behind the sentences it gets and returns it back to the user.
     It interacts with users to gather the necessary details.
-    Once the user approves by sending "is_completed": true, the agent outputs the finalized email in "final_email"."""
+    Once the user approves by sending "is_completed": true, the agent outputs the final intent in "final_intent".
+    """
 
     # Check subsequent messages and handle completion
     if state.is_completed:
-        final_mail = extract_mail(state.messages)
+        final_intent = extract_intent(state.messages)
         output_state: OutputState = OutputState(
             messages=state.messages,
             is_completed=state.is_completed,
-            final_email=final_mail)
+            final_intent=final_intent)
         return output_state
 
-    # Generate the email
+    # Generate the intention.
     llm_messages = [
-        Message(type=MsgType.human, content= MARKETING_EMAIL_PROMPT_TEMPLATE.format(separator=SEPARATOR)),
+        Message(type=MsgType.human, content= INTENTION_ANALYZER_PROMPT_TEMPLATE.format()),
     ] + (state.messages or [])
 
     state.messages = (state.messages or []) + [Message(type=MsgType.ai, content=str(llm.invoke(convert_messages(llm_messages)).content))]
@@ -110,10 +104,10 @@ def email_agent(state: AgentState) -> OutputState | AgentState:
 
 # Create the graph and add the agent node
 graph_builder = StateGraph(AgentState, output=OutputState)
-graph_builder.add_node("email_agent", email_agent)
+graph_builder.add_node("intention_analyzer_agent", intention_analyzer_agent)
 
-graph_builder.add_edge(START, "email_agent")
-graph_builder.add_edge("email_agent", END)
+graph_builder.add_edge(START, "intention_analyzer_agent")
+graph_builder.add_edge("intention_analyzer_agent", END)
 
 # Compile the graph
 graph = graph_builder.compile()

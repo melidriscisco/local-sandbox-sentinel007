@@ -10,14 +10,14 @@ from intention_analyzer.state import Message, Type as MsgType
 
 
 def main():
-    output = OutputState(messages=[], final_email=None)
+    output = OutputState(messages=[], final_intent=None)
     while True:
         if output.messages and len(output.messages) > 0:
             m = output.messages[-1]
             print(f"[Assistant] \t\t>>> {m.content}")
-        if output.final_email:
+        if output.final_intent:
             break
-        message = input("YOU [Type OK when you are happy with the email proposed] >>> ")
+        message = input("YOU [Type OK when you are happy with the intent suggested] >>> ")
 
         nextinput = AgentState(
             messages=(output.messages or [])
@@ -28,8 +28,8 @@ def main():
         out = graph.invoke(nextinput, {"configurable": {"thread_id": "foo"}})
         output: OutputState = OutputState.model_validate(out)
 
-    print("Final email is:")
-    print(output.final_email)
+    print("Final intent is:")
+    print(output.final_intent)
 
 
 main()

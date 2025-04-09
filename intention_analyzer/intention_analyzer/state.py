@@ -31,4 +31,4 @@ class AgentState(BaseModel):
     is_completed: Optional[bool] = None
 
 class OutputState(AgentState):
-    final_email: Optional[str] = Field(default=None, description="Final email produced by the mail composer")
+    final_intent: Optional[str] = Field(default=None, description="Final intent produced by the intent_analyzer.")
