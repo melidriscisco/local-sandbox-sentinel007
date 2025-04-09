@@ -1,5 +1,6 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
+from cgitb import text
 from pathlib import Path
 from pydantic import AnyUrl
 from state import AgentState, OutputState, ConfigSchema
@@ -19,8 +20,8 @@ from agntcy_acp.manifest import (
 
 manifest = AgentManifest(
     metadata=AgentMetadata(
-        ref=AgentRef(name="org.agntcy.mailcomposer", version="0.0.1", url=None),
-        description="Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"),
+        ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url=None),
+        description= "Analyzes the intent of a given text. Final output is the intent that could be used to be passed to the Judge."),
     specs=AgentACPSpec(
         input=AgentState.model_json_schema(),
         output=OutputState.model_json_schema(),
@@ -44,20 +45,22 @@ manifest = AgentManifest(
                     url=AnyUrl("file://../"),
                     framework_config=LangGraphConfig(
                         framework_type="langgraph",
-                        graph="mailcomposer.mailcomposer:graph"
+                        graph="intention_analyzer.intention_analyzer:graph"
                     )
                 )
             )
         ],
         env_vars=[
             EnvVar(name="AZURE_OPENAI_API_KEY", desc="Azure key for the OpenAI service"),
-            EnvVar(name="AZURE_OPENAI_ENDPOINT", desc="Azure endpoint for the OpenAI service")
+            EnvVar(name="AZURE_OPENAI_ENDPOINT", desc="Azure endpoint for the OpenAI service"),
+            EnvVar(name="AZURE_OPENAI_MODEL", desc="AZURE OPENAI MODEL"),
+            EnvVar(name="OPENAI_API_VERSION", desc="OPENAI_API_VERSION")
             ],
         dependencies=[]
     )
 )
 
-with open(f"{Path(__file__).parent}/../deploy/mailcomposer.json", "w") as f:
+with open(f"{Path(__file__).parent}/../deploy/intentionanalyzer.json", "w") as f:
     f.write(manifest.model_dump_json(
         exclude_unset=True,
         exclude_none=True,
