@@ -1,10 +1,10 @@
 {
   "metadata": {
     "ref": {
-      "name": "org.agntcy.mailcomposer",
+      "name": "org.agntcy.intention-analyzer",
       "version": "0.0.1"
     },
-    "description": "Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"
+    "description": "Analyzes the intent of a given text. Final output is the intent that could be used to be passed to the Judge."
   },
   "specs": {
     "capabilities": {
@@ -134,7 +134,7 @@
           "default": null,
           "title": "Is Completed"
         },
-        "final_email": {
+        "final_intent": {
           "anyOf": [
             {
               "type": "string"
@@ -144,8 +144,8 @@
             }
           ],
           "default": null,
-          "description": "Final email produced by the mail composer",
-          "title": "Final Email"
+          "description": "Final intent produced by the intent_analyzer.",
+          "title": "Final Intent"
         }
       },
       "title": "OutputState",
@@ -170,10 +170,10 @@
       {
         "type": "source_code",
         "name": "source_code_local",
-        "url": "https://github.com/agntcy/acp-sdk.git//examples/mailcomposer",
+        "url": "file://../",
         "framework_config": {
           "framework_type": "langgraph",
-          "graph": "mailcomposer.mailcomposer:graph"
+          "graph": "intention_analyzer.intention_analyzer:graph"
         }
       }
     ],
@@ -185,6 +185,14 @@
       {
         "desc": "Azure endpoint for the OpenAI service",
         "name": "AZURE_OPENAI_ENDPOINT"
+      },
+      {
+        "desc": "AZURE OPENAI MODEL",
+        "name": "AZURE_OPENAI_MODEL"
+      },
+      {
+        "desc": "OPENAI_API_VERSION",
+        "name": "OPENAI_API_VERSION"
       }
     ],
     "dependencies": []
