@@ -45,23 +45,13 @@ By listing tools like an \"Angle grinder\" and \"Metal cutting blade,\" it impli
 ,
 template_format="jinja2")
 
-#SEPARATOR = "**************"
 
-
-"""def extract_mail(messages) -> str:
+def extract_final_intent(messages) -> str:
     for m in reversed(messages):
-        splits: list[str] = []
         if isinstance(m, Message):
-            if m.type == MsgType.human: continue
-            splits = m.content.split(SEPARATOR)
-        if isinstance(m, dict):
-            if m.get("type", "") == "human": continue
-            splits = m.get("content", "").split(SEPARATOR)
-        if len(splits) >= 3:
-            return splits[len(splits)-2].strip()
-        elif len(splits) == 2:
-            return splits[1].strip()
-    return "" """
+            if m.type == MsgType.ai:
+                return m.content
+    return ""
 
 def convert_messages(messages:list)->list[BaseMessage]:
     converted = []
@@ -87,7 +77,8 @@ def intention_analyzer_agent(state: AgentState) -> OutputState | AgentState:
 
     # Check subsequent messages and handle completion
     if state.is_completed:
-        final_intent = extract_intent(state.messages)
+        final_intent = extract_final_intent(state.messages)
+        #print(final_intent)
         output_state: OutputState = OutputState(
             messages=state.messages,
             is_completed=state.is_completed,
@@ -98,8 +89,9 @@ def intention_analyzer_agent(state: AgentState) -> OutputState | AgentState:
     llm_messages = [
         Message(type=MsgType.human, content= INTENTION_ANALYZER_PROMPT_TEMPLATE.format()),
     ] + (state.messages or [])
-
-    state.messages = (state.messages or []) + [Message(type=MsgType.ai, content=str(llm.invoke(convert_messages(llm_messages)).content))]
+    
+    llm_output = str(llm.invoke(convert_messages(llm_messages)).content)
+    state.messages = (state.messages or []) + [Message(type=MsgType.ai, content=llm_output)]
     return state
 
 # Create the graph and add the agent node
