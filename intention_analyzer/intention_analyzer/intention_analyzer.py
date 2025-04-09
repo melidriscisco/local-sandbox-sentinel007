@@ -9,36 +9,118 @@ from langchain.prompts import PromptTemplate
 from langchain_core.memory import BaseMemory
 import json
 from typing import List, Dict, Any
+import faiss  # make faiss available
+
+# from langchain.vectorstores import FAISS
+# from langchain.docstore import InMemoryDocstore
+from sentence_transformers import SentenceTransformer
+from typing import ClassVar, TypeVar
 
 
 class CounterMemory(BaseMemory):
-    memories: Dict[str, Any] = dict()
+    # The key is user id
+    ## for every user I store a tuple of last counter and last timestamdp
+    user_level_memories: Dict[str, Any] = dict()
+
+    # The key is Attack pattern hash
+    ## for every pattern I store a tuple of last counter and last timestamd
+    usage_pattern_memories: Dict[str, Any] = dict()
+    sft_name: ClassVar[str] = "all-MiniLM-L6-v2"
+    sentence_tf: ClassVar[SentenceTransformer] = SentenceTransformer(sft_name)
+    doc_embd: ClassVar = sentence_tf.encode("Hello")
+    print("Doc embedding shape: ", doc_embd.shape)
+    size_embd: ClassVar = doc_embd.shape[0]
+    # faiss_index: TypeVar = faiss.normalize_L2(doc_embd)
+    faiss_index: TypeVar = faiss.IndexFlatL2(size_embd)
+
+    # vector_store = FAISS(
+    #    embedding_function=sentence_tf,
+    #    index=faiss_index,
+    #    docstore=InMemoryDocstore(),
+    #    index_to_docstore_id={},
+    # )
 
     @property
     def memory_variables(self) -> List[str]:
-        return list(self.memories.keys())
+        return list(self.user_level_memories.keys())
 
-    def add_counter(self, user_id):
-        if user_id not in self.memories:
-            self.memories[user_id] = 0
-        self.memories[user_id] += 1
+    def search(self, text, k=1, threshold=0.2) -> list:
+        decision = False
+        # results, scores = self.vector_store.similarity_search_with_score(text, k=k)
+        doc_embd = self.sentence_tf.encode([text])
+        results, indices = self.faiss_index.search(doc_embd, k)
+        top_score = results[0][0]
+        top_i = indices[0][0]
+        print("Current top score: ", top_score)
+        print("Current top index: ", top_i)
+        print("Current threshold: ", threshold)
+        ##############
+        ##############
+        if top_score > threshold:
+            decision = True
+        return {
+            "score": float(top_score),
+            "bucket_index_id": f"{top_i}",
+            "decision": decision,
+        }
+
+    def add_document_to_search_store(self, text):
+        doc_embd = self.sentence_tf.encode([text])
+        print(len(doc_embd))
+        print(f"Adding document to search store {text}")
+        self.faiss_index.add(doc_embd)
+
+    def add_counter(self, user_id, message=None):
+        if user_id not in self.user_level_memories:
+            self.user_level_memories[user_id] = 0
+        my_threshold = 0.0
+        if message:
+            pattern_result = self.search(message, threshold=my_threshold)
+            print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+            print(pattern_result)
+            index_id = f"{pattern_result['bucket_index_id']}"
+            if not pattern_result["decision"] or index_id == "-1":
+                ### New Document
+                self.add_document_to_search_store(message)
+                doc_added_result = self.search(message, threshold=-1)
+                self.usage_pattern_memories[index_id] = 1
+                print("I should have added the document and it should be the first one")
+            else:
+                self.usage_pattern_memories[index_id] += 1
+        ##############
+
+        self.user_level_memories[user_id] += 1
 
     def get_message_count(self, user_id):
-        return self.memories.get(user_id, 0)
+        return self.user_level_memories.get(user_id, 0)
 
     def load_memory_variables(self):
-        json_file = "memories.json"
-        if os.path.exists(json_file):
-            with open(json_file, "r") as f:
-                self.memories = json.load(f)
+        user_json_file = "user_memories.json"
+        if os.path.exists(user_json_file):
+            with open(user_json_file, "r") as f:
+                self.user_level_memories = json.load(f)
+        pattern_json_file = "pattern_memories.json"
+        if os.path.exists(pattern_json_file):
+            with open(pattern_json_file, "r") as f:
+                self.usage_pattern_memories = json.load(f)
+        faiss_file = "faiss_index.bin"
+        if os.path.exists(faiss_file):
+            self.faiss_index = faiss.read_index(faiss_file)
 
     def save_context(self):
-        json_file = "memories.json"
+        json_file = "user_memories.json"
         with open(json_file, "w") as f:
-            json.dump(self.memories, f)
+            json.dump(self.user_level_memories, f)
+        pattern_json_file = "pattern_memories.json"
+        with open(pattern_json_file, "w") as f:
+            json.dump(self.usage_pattern_memories, f)
+        faiss_file = "faiss_index.bin"
+        faiss.write_index(self.faiss_index, faiss_file)
 
     def clear(self):
-        self.memory = {}
+        self.usage_pattern_memories = {}
+        self.user_level_memories = {}
+        self.faiss_index.reset()
 
 
 from .state import OutputState, AgentState, Message, Type as MsgType
@@ -126,6 +208,17 @@ def convert_messages(messages: list) -> list[BaseMessage]:
     return converted
 
 
+def extract_last_human_message(messages: list) -> str:
+    for m in reversed(messages):
+        if isinstance(m, Message):
+            if m.type == MsgType.human:
+                return m.content
+        if isinstance(m, dict):
+            if m.get("type", "") == "human":
+                return m.get("content", "")
+    return None
+
+
 # Define mail_agent function
 def email_agent(state: AgentState) -> OutputState | AgentState:
     """This agent is a skilled writer for a marketing company, creating formal and professional emails for publicity campaigns.
@@ -139,13 +232,20 @@ def email_agent(state: AgentState) -> OutputState | AgentState:
     user_id = state.user_id
     # Check subsequent messages and handle completion
     if state.is_completed:
-        memory.add_counter(user_id)
+        print(state.messages[-1].content)
+        for m in state.messages:
+            print(m)
+        print("End of conversation")
+        ##############
+        memory.add_counter(user_id, message=state.messages[-1].content)
         final_mail = extract_mail(state.messages)
         output_state: OutputState = OutputState(
             messages=state.messages,
             is_completed=state.is_completed,
             final_email=final_mail,
         )
+        match_result = memory.search(state.messages[-1].content or "", k=1)
+        print(match_result)
         memory.save_context()
         return output_state
 
