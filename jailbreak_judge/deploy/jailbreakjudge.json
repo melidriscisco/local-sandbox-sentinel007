@@ -1,10 +1,10 @@
 {
   "metadata": {
     "ref": {
-      "name": "org.agntcy.mailcomposer",
+      "name": "org.agntcy.jailbreak-judge",
       "version": "0.0.1"
     },
-    "description": "Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"
+    "description": "This agent classifies a prompt as malicious or benign based on the analysis provided by it's counterpart agents.          Final output is on of the two tags : \"VALID\" or \"INVALID\" followed by an explanation"
   },
   "specs": {
     "capabilities": {
@@ -70,6 +70,30 @@
           ],
           "default": null,
           "title": "Is Completed"
+        },
+        "intent_analyzer_output": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "",
+          "title": "Intent Analyzer Output"
+        },
+        "prompt_analyzer_output": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "",
+          "title": "Prompt Analyzer Output"
         }
       },
       "title": "AgentState",
@@ -134,7 +158,31 @@
           "default": null,
           "title": "Is Completed"
         },
-        "final_email": {
+        "intent_analyzer_output": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "",
+          "title": "Intent Analyzer Output"
+        },
+        "prompt_analyzer_output": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "",
+          "title": "Prompt Analyzer Output"
+        },
+        "final_judgement": {
           "anyOf": [
             {
               "type": "string"
@@ -144,8 +192,8 @@
             }
           ],
           "default": null,
-          "description": "Final email produced by the mail composer",
-          "title": "Final Email"
+          "description": "Final judgement produced by the jailbreak judge",
+          "title": "Final Judgement"
         }
       },
       "title": "OutputState",
@@ -170,10 +218,10 @@
       {
         "type": "source_code",
         "name": "source_code_local",
-        "url": "https://github.com/agntcy/acp-sdk.git//examples/mailcomposer",
+        "url": "file://../",
         "framework_config": {
           "framework_type": "langgraph",
-          "graph": "mailcomposer.mailcomposer:graph"
+          "graph": "jailbreak_judge.jailbreak_judge:graph"
         }
       }
     ],
@@ -185,6 +233,14 @@
       {
         "desc": "Azure endpoint for the OpenAI service",
         "name": "AZURE_OPENAI_ENDPOINT"
+      },
+      {
+        "desc": "AZURE OPENAI MODEL",
+        "name": "AZURE_OPENAI_MODEL"
+      },
+      {
+        "desc": "OPENAI_API_VERSION",
+        "name": "OPENAI_API_VERSION"
       }
     ],
     "dependencies": []
