@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from pathlib import Path
 from pydantic import AnyUrl
-from marketing_campaign.state import OverallState, ConfigModel
+from sentinel007_agent.state import OverallState, ConfigModel
 from agntcy_acp.manifest import (
     AgentManifest,
     AgentDeployment,
@@ -20,8 +20,8 @@ from agntcy_acp.manifest import (
 
 manifest = AgentManifest(
     metadata=AgentMetadata(
-        ref=AgentRef(name="org.agntcy.marketing-campaign", version="0.0.1", url=None),
-        description="Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"),
+        ref=AgentRef(name="org.agntcy.sentinel007", version="0.0.1", url=None),
+        description="Jailbreak Defense Agent"),
     specs=AgentACPSpec(
         input=OverallState.model_json_schema(),
         output=OverallState.model_json_schema(),
@@ -45,24 +45,30 @@ manifest = AgentManifest(
                     url=AnyUrl("file://../"),
                     framework_config=LangGraphConfig(
                         framework_type="langgraph",
-                        graph="marketing_campaign.app:graph"
+                        graph="sentinel007_agent.app:graph"
                     )
                 )
             )
         ],
         env_vars=[EnvVar(name="AZURE_OPENAI_API_KEY", desc="Azure key for the OpenAI service"),
                   EnvVar(name="AZURE_OPENAI_ENDPOINT", desc="Azure endpoint for the OpenAI service"),
-                  EnvVar(name="SENDGRID_API_KEY", desc="Sendgrid API key")],
+                    ],
         dependencies=[
             AgentDependency(
-                name="mailcomposer",
-                ref=AgentRef(name="org.agntcy.mailcomposer", version="0.0.1", url=AnyUrl("file://mailcomposer.json")),
+                name="intention-analyzer",
+                ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url=AnyUrl("file://intentionanalyzer.json")),
+                deployment_option = None,
+                env_var_values = None
+            ),
+            AgentDependency(
+                name="prompt-analyzer",
+                ref=AgentRef(name="org.agntcy.prompt-analyzer", version="0.0.1", url=AnyUrl("file://promptanalyzer.json")),
                 deployment_option = None,
                 env_var_values = None
             ),
            AgentDependency(
-                name="email_reviewer",
-                ref=AgentRef(name="org.agntcy.email_reviewer", version="0.0.1", url=AnyUrl("file://email_reviewer.json")),
+                name="jailbreak-judge",
+                ref=AgentRef(name="org.agntcy.jailbreak-judge", version="0.0.1", url=AnyUrl("file://jailbreakjudge.json")),
                 deployment_option = None,
                 env_var_values = None
             )
@@ -70,7 +76,7 @@ manifest = AgentManifest(
     )
 )
 
-with open(f"{Path(__file__).parent}/../../deploy/marketing-campaign.json", "w") as f:
+with open(f"{Path(__file__).parent}/../deploy/sentinel007.json", "w") as f:
     f.write(manifest.model_dump_json(
         exclude_unset=True,
         exclude_none=True,

@@ -2,9 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 import os
 import asyncio
-from marketing_campaign.state import OverallState, ConfigModel
-from marketing_campaign import mailcomposer
-from marketing_campaign.email_reviewer import TargetAudience
+from sentinel007_agent.state import OverallState, ConfigModel, IntentionAnalyzerState
+#from marketing_campaign.email_reviewer import TargetAudience
 from agntcy_acp import AsyncACPClient, ApiClientConfiguration
 from agntcy_acp.acp_v0.async_client.api_client import ApiClient as AsyncApiClient
 
@@ -17,26 +16,26 @@ from agntcy_acp.models import (
 
 
 async def main():
-    print("What marketing campaign do you want to create?")
+    print("What do you want to ask the agent?")
     inputState = OverallState(
         messages=[],
         operation_logs=[],
         has_composer_completed=False
     )
 
-    marketing_campaign_id = os.environ.get("MARKETING_CAMPAIGN_ID", "")
+    sentinel_id = os.environ.get("sentinel_ID", "")
     client_config = ApiClientConfiguration.fromEnvPrefix("MARKETING_CAMPAIGN_")
 
     while True:
         usermsg = input("YOU [Type OK when you are happy with the email proposed] >>> ")
-        inputState.messages.append(mailcomposer.Message(content=usermsg, type=mailcomposer.Type.human))
+        inputState.messages.append(IntentionAnalyzerState.Message(content=usermsg, type=IntentionAnalyzerState.Type.human))
         run_create = RunCreateStateless(
-            agent_id=marketing_campaign_id,
+            agent_id=sentinel_id,
             input=inputState.model_dump(),
             config=Config(configurable=ConfigModel(
                 recipient_email_address=os.environ["RECIPIENT_EMAIL_ADDRESS"],
                 sender_email_address=os.environ["SENDER_EMAIL_ADDRESS"],
-                target_audience=TargetAudience.academic
+                # target_audience=TargetAudience.academic
             ).model_dump())
         )
         async with AsyncApiClient(configuration=client_config) as api_client:

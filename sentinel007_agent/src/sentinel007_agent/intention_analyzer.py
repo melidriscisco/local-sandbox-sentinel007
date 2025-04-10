@@ -1,6 +1,5 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
-# Generated from ACP Descriptor org.agntcy.mailcomposer using datamodel_code_generator.
 
 from __future__ import annotations
 
@@ -32,8 +31,8 @@ class OutputSchema(BaseModel):
     is_completed: Optional[bool] = Field(None, title='Is Completed')
     final_email: Optional[str] = Field(
         None,
-        description='Final email produced by the mail composer',
-        title='Final Email',
+        description='Final intent of the user',
+        title='Final intent',
     )
 
 

@@ -2,15 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 import os
 import asyncio
-from marketing_campaign.app import graph
-from marketing_campaign.state import OverallState, ConfigModel
-from marketing_campaign import mailcomposer
-from marketing_campaign.email_reviewer import TargetAudience
+from sentinel007_agent.app import graph
+from sentinel007_agent.state import OverallState, ConfigModel, IntentionAnalyzerState
+# from marketing_campaign.email_reviewer import TargetAudience
 from langchain_core.runnables.config import RunnableConfig
 
 
 async def main():
-    print("What marketing campaign do you want to create?")
+    print("What do you want to ask the agent?")
     inputState = OverallState(
         messages=[],
         operation_logs=[],
@@ -18,12 +17,12 @@ async def main():
     )
     while True:
         usermsg = input("YOU [Type OK when you are happy with the email proposed] >>> ")
-        inputState.messages.append(mailcomposer.Message(content=usermsg, type=mailcomposer.Type.human))
+        inputState.messages.append(IntentionAnalyzerState.Message(content=usermsg, type=IntentionAnalyzerState.Type.human))
         output = await graph.ainvoke(inputState, RunnableConfig(
             configurable=ConfigModel(
                 recipient_email_address=os.environ["RECIPIENT_EMAIL_ADDRESS"],
                 sender_email_address=os.environ["SENDER_EMAIL_ADDRESS"],
-                target_audience=TargetAudience.academic
+                # target_audience=TargetAudience.academic
             ).model_dump()
         )
 )

@@ -1,10 +1,10 @@
 {
   "metadata": {
     "ref": {
-      "name": "org.agntcy.marketing-campaign",
+      "name": "org.agntcy.sentinel007",
       "version": "0.0.1"
     },
-    "description": "Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"
+    "description": "Jailbreak Defense Agent"
   },
   "specs": {
     "capabilities": {
@@ -14,40 +14,12 @@
     },
     "input": {
       "$defs": {
-        "APIBridgeInput": {
-          "properties": {
-            "query": {
-              "description": "Query for the API bridge agent in natural language",
-              "title": "Query",
-              "type": "string"
-            }
-          },
-          "required": [
-            "query"
-          ],
-          "title": "APIBridgeInput",
-          "type": "object"
-        },
-        "APIBridgeOutput": {
-          "properties": {
-            "result": {
-              "description": "API response from API bridge agent",
-              "title": "Result",
-              "type": "string"
-            }
-          },
-          "required": [
-            "result"
-          ],
-          "title": "APIBridgeOutput",
-          "type": "object"
-        },
-        "MailComposerState": {
+        "IntentionAnalyzerState": {
           "properties": {
             "input": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/mailcomposer__InputSchema"
+                  "$ref": "#/$defs/sentinel007_agent__intention_analyzer__InputSchema"
                 },
                 {
                   "type": "null"
@@ -58,7 +30,7 @@
             "output": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/mailcomposer__OutputSchema"
+                  "$ref": "#/$defs/sentinel007_agent__intention_analyzer__OutputSchema"
                 },
                 {
                   "type": "null"
@@ -67,15 +39,15 @@
               "default": null
             }
           },
-          "title": "MailComposerState",
+          "title": "IntentionAnalyzerState",
           "type": "object"
         },
-        "MailReviewerState": {
+        "JudgeState": {
           "properties": {
             "input": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/email_reviewer__InputSchema"
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_judge__InputSchema"
                 },
                 {
                   "type": "null"
@@ -86,7 +58,7 @@
             "output": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/email_reviewer__OutputSchema"
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_judge__OutputSchema"
                 },
                 {
                   "type": "null"
@@ -95,7 +67,7 @@
               "default": null
             }
           },
-          "title": "MailReviewerState",
+          "title": "JudgeState",
           "type": "object"
         },
         "Message": {
@@ -117,12 +89,12 @@
           "title": "Message",
           "type": "object"
         },
-        "SendGridState": {
+        "PromptAnalyzerState": {
           "properties": {
             "input": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/APIBridgeInput"
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_prompt_analyzer__InputSchema"
                 },
                 {
                   "type": "null"
@@ -133,7 +105,7 @@
             "output": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/APIBridgeOutput"
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema"
                 },
                 {
                   "type": "null"
@@ -142,7 +114,7 @@
               "default": null
             }
           },
-          "title": "SendGridState",
+          "title": "PromptAnalyzerState",
           "type": "object"
         },
         "TargetAudience": {
@@ -164,53 +136,7 @@
           "title": "Type",
           "type": "string"
         },
-        "email_reviewer__InputSchema": {
-          "properties": {
-            "email": {
-              "description": "The email content to be reviewed and corrected",
-              "title": "Email",
-              "type": "string"
-            },
-            "target_audience": {
-              "$ref": "#/$defs/TargetAudience",
-              "description": "The target audience for the email, affecting the style of review"
-            }
-          },
-          "required": [
-            "email",
-            "target_audience"
-          ],
-          "title": "InputSchema",
-          "type": "object"
-        },
-        "email_reviewer__OutputSchema": {
-          "properties": {
-            "correct": {
-              "description": "Indicates whether the email is correct and requires no changes",
-              "title": "Correct",
-              "type": "boolean"
-            },
-            "corrected_email": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "description": "The corrected version of the email, if changes were necessary",
-              "title": "Corrected Email"
-            }
-          },
-          "required": [
-            "correct"
-          ],
-          "title": "OutputSchema",
-          "type": "object"
-        },
-        "mailcomposer__InputSchema": {
+        "sentinel007_agent__intention_analyzer__InputSchema": {
           "properties": {
             "messages": {
               "anyOf": [
@@ -243,7 +169,7 @@
           "title": "InputSchema",
           "type": "object"
         },
-        "mailcomposer__OutputSchema": {
+        "sentinel007_agent__intention_analyzer__OutputSchema": {
           "properties": {
             "messages": {
               "anyOf": [
@@ -281,11 +207,97 @@
                   "type": "null"
                 }
               ],
-              "title": "Final Email"
+              "default": null,
+              "description": "Final intent of the user",
+              "title": "Final intent"
+            }
+          },
+          "title": "OutputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_judge__InputSchema": {
+          "properties": {
+            "intent": {
+              "description": "The email content to be reviewed and corrected",
+              "title": "Email",
+              "type": "string"
             }
           },
           "required": [
-            "final_email"
+            "intent"
+          ],
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_judge__OutputSchema": {
+          "properties": {
+            "correct": {
+              "description": "Indicates whether the email is correct and requires no changes",
+              "title": "Correct",
+              "type": "boolean"
+            },
+            "corrected_email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The corrected version of the email, if changes were necessary",
+              "title": "Corrected Email"
+            }
+          },
+          "required": [
+            "correct"
+          ],
+          "title": "OutputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_prompt_analyzer__InputSchema": {
+          "properties": {
+            "email": {
+              "description": "The email content to be reviewed and corrected",
+              "title": "Email",
+              "type": "string"
+            },
+            "target_audience": {
+              "$ref": "#/$defs/TargetAudience",
+              "description": "The target audience for the email, affecting the style of review"
+            }
+          },
+          "required": [
+            "email",
+            "target_audience"
+          ],
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema": {
+          "properties": {
+            "correct": {
+              "description": "Indicates whether the email is correct and requires no changes",
+              "title": "Correct",
+              "type": "boolean"
+            },
+            "corrected_email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The corrected version of the email, if changes were necessary",
+              "title": "Corrected Email"
+            }
+          },
+          "required": [
+            "correct"
           ],
           "title": "OutputSchema",
           "type": "object"
@@ -301,22 +313,7 @@
           "title": "Messages",
           "type": "array"
         },
-        "operation_logs": {
-          "default": [],
-          "description": "An array containing all the operations performed and their result. Each operation is appended to this array with a timestamp.",
-          "examples": [
-            [
-              "Mar 15 18:10:39 Operation performed: email sent Result: OK",
-              "Mar 19 18:13:39 Operation X failed"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Operation Logs",
-          "type": "array"
-        },
-        "has_composer_completed": {
+        "has_intention_completed": {
           "anyOf": [
             {
               "type": "boolean"
@@ -326,10 +323,9 @@
             }
           ],
           "default": null,
-          "description": "Flag indicating if the mail composer has succesfully completed its task",
-          "title": "Has Composer Completed"
+          "title": "Has Intention Completed"
         },
-        "has_reviewer_completed": {
+        "has_prompt_analyzer_completed": {
           "anyOf": [
             {
               "type": "boolean"
@@ -339,7 +335,19 @@
             }
           ],
           "default": null,
-          "title": "Has Reviewer Completed"
+          "title": "Has Prompt Analyzer Completed"
+        },
+        "has_judge_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Has Judge Completed"
         },
         "has_sender_completed": {
           "anyOf": [
@@ -353,10 +361,10 @@
           "default": null,
           "title": "Has Sender Completed"
         },
-        "mailcomposer_state": {
+        "intention_analyzer_state": {
           "anyOf": [
             {
-              "$ref": "#/$defs/MailComposerState"
+              "$ref": "#/$defs/IntentionAnalyzerState"
             },
             {
               "type": "null"
@@ -364,10 +372,10 @@
           ],
           "default": null
         },
-        "email_reviewer_state": {
+        "prompt_analyzer_state": {
           "anyOf": [
             {
-              "$ref": "#/$defs/MailReviewerState"
+              "$ref": "#/$defs/PromptAnalyzerState"
             },
             {
               "type": "null"
@@ -375,21 +383,10 @@
           ],
           "default": null
         },
-        "target_audience": {
+        "judge_state": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TargetAudience"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        },
-        "sendgrid_state": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SendGridState"
+              "$ref": "#/$defs/JudgeState"
             },
             {
               "type": "null"
@@ -403,40 +400,12 @@
     },
     "output": {
       "$defs": {
-        "APIBridgeInput": {
-          "properties": {
-            "query": {
-              "description": "Query for the API bridge agent in natural language",
-              "title": "Query",
-              "type": "string"
-            }
-          },
-          "required": [
-            "query"
-          ],
-          "title": "APIBridgeInput",
-          "type": "object"
-        },
-        "APIBridgeOutput": {
-          "properties": {
-            "result": {
-              "description": "API response from API bridge agent",
-              "title": "Result",
-              "type": "string"
-            }
-          },
-          "required": [
-            "result"
-          ],
-          "title": "APIBridgeOutput",
-          "type": "object"
-        },
-        "MailComposerState": {
+        "IntentionAnalyzerState": {
           "properties": {
             "input": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/mailcomposer__InputSchema"
+                  "$ref": "#/$defs/sentinel007_agent__intention_analyzer__InputSchema"
                 },
                 {
                   "type": "null"
@@ -447,7 +416,7 @@
             "output": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/mailcomposer__OutputSchema"
+                  "$ref": "#/$defs/sentinel007_agent__intention_analyzer__OutputSchema"
                 },
                 {
                   "type": "null"
@@ -456,15 +425,15 @@
               "default": null
             }
           },
-          "title": "MailComposerState",
+          "title": "IntentionAnalyzerState",
           "type": "object"
         },
-        "MailReviewerState": {
+        "JudgeState": {
           "properties": {
             "input": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/email_reviewer__InputSchema"
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_judge__InputSchema"
                 },
                 {
                   "type": "null"
@@ -475,7 +444,7 @@
             "output": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/email_reviewer__OutputSchema"
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_judge__OutputSchema"
                 },
                 {
                   "type": "null"
@@ -484,7 +453,7 @@
               "default": null
             }
           },
-          "title": "MailReviewerState",
+          "title": "JudgeState",
           "type": "object"
         },
         "Message": {
@@ -506,12 +475,12 @@
           "title": "Message",
           "type": "object"
         },
-        "SendGridState": {
+        "PromptAnalyzerState": {
           "properties": {
             "input": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/APIBridgeInput"
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_prompt_analyzer__InputSchema"
                 },
                 {
                   "type": "null"
@@ -522,7 +491,7 @@
             "output": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/APIBridgeOutput"
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema"
                 },
                 {
                   "type": "null"
@@ -531,7 +500,7 @@
               "default": null
             }
           },
-          "title": "SendGridState",
+          "title": "PromptAnalyzerState",
           "type": "object"
         },
         "TargetAudience": {
@@ -553,53 +522,7 @@
           "title": "Type",
           "type": "string"
         },
-        "email_reviewer__InputSchema": {
-          "properties": {
-            "email": {
-              "description": "The email content to be reviewed and corrected",
-              "title": "Email",
-              "type": "string"
-            },
-            "target_audience": {
-              "$ref": "#/$defs/TargetAudience",
-              "description": "The target audience for the email, affecting the style of review"
-            }
-          },
-          "required": [
-            "email",
-            "target_audience"
-          ],
-          "title": "InputSchema",
-          "type": "object"
-        },
-        "email_reviewer__OutputSchema": {
-          "properties": {
-            "correct": {
-              "description": "Indicates whether the email is correct and requires no changes",
-              "title": "Correct",
-              "type": "boolean"
-            },
-            "corrected_email": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "description": "The corrected version of the email, if changes were necessary",
-              "title": "Corrected Email"
-            }
-          },
-          "required": [
-            "correct"
-          ],
-          "title": "OutputSchema",
-          "type": "object"
-        },
-        "mailcomposer__InputSchema": {
+        "sentinel007_agent__intention_analyzer__InputSchema": {
           "properties": {
             "messages": {
               "anyOf": [
@@ -632,7 +555,7 @@
           "title": "InputSchema",
           "type": "object"
         },
-        "mailcomposer__OutputSchema": {
+        "sentinel007_agent__intention_analyzer__OutputSchema": {
           "properties": {
             "messages": {
               "anyOf": [
@@ -670,11 +593,97 @@
                   "type": "null"
                 }
               ],
-              "title": "Final Email"
+              "default": null,
+              "description": "Final intent of the user",
+              "title": "Final intent"
+            }
+          },
+          "title": "OutputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_judge__InputSchema": {
+          "properties": {
+            "intent": {
+              "description": "The email content to be reviewed and corrected",
+              "title": "Email",
+              "type": "string"
             }
           },
           "required": [
-            "final_email"
+            "intent"
+          ],
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_judge__OutputSchema": {
+          "properties": {
+            "correct": {
+              "description": "Indicates whether the email is correct and requires no changes",
+              "title": "Correct",
+              "type": "boolean"
+            },
+            "corrected_email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The corrected version of the email, if changes were necessary",
+              "title": "Corrected Email"
+            }
+          },
+          "required": [
+            "correct"
+          ],
+          "title": "OutputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_prompt_analyzer__InputSchema": {
+          "properties": {
+            "email": {
+              "description": "The email content to be reviewed and corrected",
+              "title": "Email",
+              "type": "string"
+            },
+            "target_audience": {
+              "$ref": "#/$defs/TargetAudience",
+              "description": "The target audience for the email, affecting the style of review"
+            }
+          },
+          "required": [
+            "email",
+            "target_audience"
+          ],
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema": {
+          "properties": {
+            "correct": {
+              "description": "Indicates whether the email is correct and requires no changes",
+              "title": "Correct",
+              "type": "boolean"
+            },
+            "corrected_email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The corrected version of the email, if changes were necessary",
+              "title": "Corrected Email"
+            }
+          },
+          "required": [
+            "correct"
           ],
           "title": "OutputSchema",
           "type": "object"
@@ -690,22 +699,7 @@
           "title": "Messages",
           "type": "array"
         },
-        "operation_logs": {
-          "default": [],
-          "description": "An array containing all the operations performed and their result. Each operation is appended to this array with a timestamp.",
-          "examples": [
-            [
-              "Mar 15 18:10:39 Operation performed: email sent Result: OK",
-              "Mar 19 18:13:39 Operation X failed"
-            ]
-          ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Operation Logs",
-          "type": "array"
-        },
-        "has_composer_completed": {
+        "has_intention_completed": {
           "anyOf": [
             {
               "type": "boolean"
@@ -715,10 +709,9 @@
             }
           ],
           "default": null,
-          "description": "Flag indicating if the mail composer has succesfully completed its task",
-          "title": "Has Composer Completed"
+          "title": "Has Intention Completed"
         },
-        "has_reviewer_completed": {
+        "has_prompt_analyzer_completed": {
           "anyOf": [
             {
               "type": "boolean"
@@ -728,7 +721,19 @@
             }
           ],
           "default": null,
-          "title": "Has Reviewer Completed"
+          "title": "Has Prompt Analyzer Completed"
+        },
+        "has_judge_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Has Judge Completed"
         },
         "has_sender_completed": {
           "anyOf": [
@@ -742,10 +747,10 @@
           "default": null,
           "title": "Has Sender Completed"
         },
-        "mailcomposer_state": {
+        "intention_analyzer_state": {
           "anyOf": [
             {
-              "$ref": "#/$defs/MailComposerState"
+              "$ref": "#/$defs/IntentionAnalyzerState"
             },
             {
               "type": "null"
@@ -753,10 +758,10 @@
           ],
           "default": null
         },
-        "email_reviewer_state": {
+        "prompt_analyzer_state": {
           "anyOf": [
             {
-              "$ref": "#/$defs/MailReviewerState"
+              "$ref": "#/$defs/PromptAnalyzerState"
             },
             {
               "type": "null"
@@ -764,21 +769,10 @@
           ],
           "default": null
         },
-        "target_audience": {
+        "judge_state": {
           "anyOf": [
             {
-              "$ref": "#/$defs/TargetAudience"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        },
-        "sendgrid_state": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SendGridState"
+              "$ref": "#/$defs/JudgeState"
             },
             {
               "type": "null"
@@ -801,17 +795,11 @@
           "description": "Email address of the email sender",
           "title": "Sender Email Address",
           "type": "string"
-        },
-        "target_audience": {
-          "description": "Target audience for the marketing campaign",
-          "title": "Target Audience",
-          "type": "string"
         }
       },
       "required": [
         "recipient_email_address",
-        "sender_email_address",
-        "target_audience"
+        "sender_email_address"
       ],
       "title": "ConfigModel",
       "type": "object"
@@ -822,10 +810,10 @@
       {
         "type": "source_code",
         "name": "source_code_local",
-        "url": "file://.",
+        "url": "file://../",
         "framework_config": {
           "framework_type": "langgraph",
-          "graph": "marketing_campaign.app:graph"
+          "graph": "sentinel007_agent.app:graph"
         }
       }
     ],
@@ -837,27 +825,31 @@
       {
         "desc": "Azure endpoint for the OpenAI service",
         "name": "AZURE_OPENAI_ENDPOINT"
-      },
-      {
-        "desc": "Sendgrid API key",
-        "name": "SENDGRID_API_KEY"
       }
     ],
     "dependencies": [
       {
-        "name": "mailcomposer",
+        "name": "intention-analyzer",
         "ref": {
-          "name": "org.agntcy.mailcomposer",
+          "name": "org.agntcy.intention-analyzer",
           "version": "0.0.1",
-          "url": "../mailcomposer/deploy/mailcomposer.json"
+          "url": "file://intentionanalyzer.json/"
         }
       },
       {
-        "name": "email_reviewer",
+        "name": "prompt-analyzer",
         "ref": {
-          "name": "org.agntcy.email_reviewer",
+          "name": "org.agntcy.prompt-analyzer",
           "version": "0.0.1",
-          "url": "../email_reviewer/deploy/email_reviewer.json"
+          "url": "file://promptanalyzer.json/"
+        }
+      },
+      {
+        "name": "jailbreak-judge",
+        "ref": {
+          "name": "org.agntcy.jailbreak-judge",
+          "version": "0.0.1",
+          "url": "file://jailbreakjudge.json/"
         }
       }
     ]
