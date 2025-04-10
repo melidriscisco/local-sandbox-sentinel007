@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
+
 class Type(Enum):
     human = 'human'
     assistant = 'assistant'
@@ -20,15 +21,16 @@ class Message(BaseModel):
     content: str = Field(..., description='the content of the message')
 
 
-
 class ConfigSchema(BaseModel):
     test: bool
 
 
-
 class AgentState(BaseModel):
-    messages: Optional[list[Message]] = None
-    is_completed: Optional[bool] = None
+    messages: Optional[List[Message]] = None
+    unfiltered_llm_response: Optional[str] = None
+    intention_analyzer_output: Optional[str] = None
+    #is_completed: Optional[bool] = None
+
 
 class OutputState(AgentState):
-    final_email: Optional[str] = Field(default=None, description="Final email produced by the mail composer")
+    prompt_analyzer_output: Optional[str] = Field(default=None, description="List of prompts tom produce same LLM response.")
