@@ -2,7 +2,7 @@
 name = "intention_analyzer"
 version = "0.1.0"
 description = "A tool for analyzing user intentions in natural language."
-authors = ["Sentinel Being <@cisco.com>"]
+authors = ["SreeGowriAddepalli <sreeadde@cisco.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
