@@ -29,6 +29,8 @@ class ConfigSchema(BaseModel):
 class AgentState(BaseModel):
     messages: Optional[list[Message]] = None
     is_completed: Optional[bool] = None
+    intent_analyzer_output: Optional[str] = ""
+    prompt_analyzer_output: Optional[str] = ""
 
 class OutputState(AgentState):
-    final_email: Optional[str] = Field(default=None, description="Final email produced by the mail composer")
+    final_judgement: Optional[str] = Field(default=None, description="Final judgement produced by the jailbreak judge")
