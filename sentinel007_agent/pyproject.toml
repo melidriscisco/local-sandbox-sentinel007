@@ -1,6 +1,6 @@
 [project]
 name = "sentinel007_agent"
-version = "0.0.1"
+version = "0.0.2"
 description = ""
 authors = [
     {name = "Aditya Ramesh",email = "aditrame@cisco.com"},

@@ -221,14 +221,6 @@
       }
     ],
     "dependencies": [
-      {
-        "name": "intention-analyzer",
-        "ref": {
-          "name": "org.agntcy.intention-analyzer",
-          "version": "0.0.1",
-          "url": "../../intention_analyzer/deploy/intentionanalyzer.json"
-        }
-      }
     ]
   }
 }

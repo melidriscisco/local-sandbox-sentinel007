@@ -20,7 +20,7 @@ from agntcy_acp.manifest import (
 
 manifest = AgentManifest(
     metadata=AgentMetadata(
-        ref=AgentRef(name="org.agntcy.sentinel007", version="0.0.1", url=None),
+        ref=AgentRef(name="sentinel007", version="0.0.1", url=None),
         description="Jailbreak Defense Agent"),
     specs=AgentACPSpec(
         input=OverallState.model_json_schema(),
@@ -41,11 +41,11 @@ manifest = AgentManifest(
             DeploymentOptions(
                 root = SourceCodeDeployment(
                     type="source_code",
-                    name="source_code_local",
-                    url=AnyUrl("file://../"),
+                    name="sentinel007",
+                    url=AnyUrl("https://github.com/melidriscisco/local-sandbox-sentinel007.git//sentinel007_agent"),
                     framework_config=LangGraphConfig(
                         framework_type="langgraph",
-                        graph="sentinel007_agent.app:graph"
+                        graph="src.sentinel007_agent.app:graph"
                     )
                 )
             )
@@ -58,20 +58,22 @@ manifest = AgentManifest(
         dependencies=[
             AgentDependency(
                 name="intention-analyzer",
-                ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url="../../intention_analyzer/deploy/intentionanalyzer.json"),
-                # ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url=AnyUrl("file://intentionanalyzer.json")),
+                # ref=AgentRef(name="intention-analyzer", version="0.0.1", url="../../intention_analyzer/deploy/intentionanalyzer.json"),
+                ref=AgentRef(name="intention-analyzer", version="0.0.1", url=AnyUrl("file://intentionanalyzer.json")),
                 deployment_option = None,
                 env_var_values = None
             ),
             AgentDependency(
                 name="jailbreak-prompt-analyzer",
-                ref=AgentRef(name="org.agntcy.jailbreak-prompt-analyzer", version="0.0.1", url="../../jailbreak_judge/deploy/jailbreakjudge.json"),
+                # ref=AgentRef(name="jailbreak-prompt-analyzer", version="0.0.1", url="../../jailbreak_judge/deploy/jailbreakjudge.json"),
+                ref=AgentRef(name="jailbreak-prompt-analyzer", version="0.0.1", url=AnyUrl("file://jailbreakjudge.json")),
                 deployment_option = None,
                 env_var_values = None
             ),
            AgentDependency(
                 name="jailbreak-judge",
-                ref=AgentRef(name="org.agntcy.jailbreak-judge", version="0.0.1", url="../../jailbreak_prompt_analyzer/deploy/jailbreakpromptanalyzer.json"),
+                # ref=AgentRef(name="jailbreak-judge", version="0.0.1", url="../../jailbreak_prompt_analyzer/deploy/jailbreakpromptanalyzer.json"),
+                ref=AgentRef(name="jailbreak-prompt-analyzer", version="0.0.1", url=AnyUrl("file://jailbreakpromptanalyzer.json")),
                 deployment_option = None,
                 env_var_values = None
             )

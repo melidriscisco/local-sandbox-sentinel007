@@ -49,18 +49,6 @@ def process_inputs(state: state.OverallState, config: RunnableConfig) -> state.O
     )
     return state
 
-def prepare_output(state: state.OverallState, config:RunnableConfig) -> state.OverallState:
-    state.messages = copy.deepcopy(
-        state.judge_state.output.messages if (state.judge_state
-            and state.judge_state.output
-            and state.judge_state.output.messages
-        ) else []
-    )
-    # if state.sendgrid_state and state.sendgrid_state.output and state.sendgrid_state.output.result:
-    #     state.operation_logs.append(f"Email Send Operation: {state.sendgrid_state.output.result}")
-
-    return state
-
 
 def check_final_response(state: state.OverallState):
     return "done" if (state.judge_state
@@ -120,8 +108,7 @@ def build_graph() -> CompiledStateGraph:
     sg.add_edge("process_inputs", acp_intention_analyzer.get_name())
     sg.add_edge(acp_intention_analyzer.get_name(), acp_prompt_analyzer.get_name())
     sg.add_edge(acp_prompt_analyzer.get_name(), acp_judge.get_name())
-    sg.add_edge(acp_judge.get_name(), "prepare_output")
-    sg.add_edge("prepare_output", END)
+    sg.add_edge(acp_judge.get_name(), END)
 
     g = sg.compile()
     g.name = "Sentinel 007"
