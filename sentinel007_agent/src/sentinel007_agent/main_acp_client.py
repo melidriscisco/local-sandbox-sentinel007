@@ -1,6 +1,7 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import os
+import uuid
 import asyncio
 from sentinel007_agent.state import OverallState, ConfigModel, IntentionAnalyzerState
 #from marketing_campaign.email_reviewer import TargetAudience
@@ -17,26 +18,24 @@ from agntcy_acp.models import (
 
 async def main():
     print("What do you want to ask the agent?")
+    session_uuid = uuid.uuid4()
+    print("Session UUID:", session_uuid)
+    sentinel_id = os.environ.get("sentinel_ID", "")
     inputState = OverallState(
         messages=[],
         operation_logs=[],
-        has_composer_completed=False
+        has_composer_completed=False,
+        session_id= session_uuid,
+        agent_id= sentinel_id
     )
-
-    sentinel_id = os.environ.get("sentinel_ID", "")
-    client_config = ApiClientConfiguration.fromEnvPrefix("MARKETING_CAMPAIGN_")
+    client_config = ApiClientConfiguration.fromEnvPrefix("SENTINEL07_")
 
     while True:
-        usermsg = input("YOU [Type OK when you are happy with the email proposed] >>> ")
+        usermsg = input("YOU [Input prompt] >>> ")
         inputState.messages.append(IntentionAnalyzerState.Message(content=usermsg, type=IntentionAnalyzerState.Type.human))
         run_create = RunCreateStateless(
             agent_id=sentinel_id,
-            input=inputState.model_dump(),
-            config=Config(configurable=ConfigModel(
-                recipient_email_address=os.environ["RECIPIENT_EMAIL_ADDRESS"],
-                sender_email_address=os.environ["SENDER_EMAIL_ADDRESS"],
-                # target_audience=TargetAudience.academic
-            ).model_dump())
+            input=inputState.model_dump()
         )
         async with AsyncApiClient(configuration=client_config) as api_client:
             acp_client = AsyncACPClient(api_client=api_client)

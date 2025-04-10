@@ -7,6 +7,7 @@ from typing import List, Dict, Optional
 from langchain_core.messages import  AIMessage, HumanMessage
 from sentinel007_agent import intention_analyzer, jailbreak_judge, jailbreak_prompt_analyzer
 
+
 class ConfigModel(BaseModel):
     recipient_email_address: str = Field(..., description="Email address of the email recipient")
     sender_email_address: str = Field(..., description="Email address of the email sender")
@@ -28,6 +29,7 @@ class JudgeState(BaseModel):
 #     input: Optional[APIBridgeInput] = None
 #     output: Optional[APIBridgeOutput]= None
 
+
 class OverallState(BaseModel):
     messages: List[intention_analyzer.Message] = Field([], description="Chat messages")
     # operation_logs: List[str] = Field([],
@@ -42,5 +44,7 @@ class OverallState(BaseModel):
     intention_analyzer_state: Optional[IntentionAnalyzerState] = None
     prompt_analyzer_state: Optional[PromptAnalyzerState] = None
     judge_state: Optional[JudgeState] = None
+    session_id: Optional[str] = None
+    agent_id: Optional[str] = None
     #target_audience: Optional[email_reviewer.TargetAudience] = None
     # sendgrid_state: Optional[SendGridState] = None

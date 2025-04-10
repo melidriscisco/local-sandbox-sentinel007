@@ -29,6 +29,8 @@ class ConfigSchema(BaseModel):
 class AgentState(BaseModel):
     messages: Optional[list[Message]] = None
     is_completed: Optional[bool] = None
+    session_id: Optional[str] = None
+    agent_id: Optional[str] = None
 
 class OutputState(AgentState):
     final_intent: Optional[str] = Field(default=None, description="Final intent produced by the intent_analyzer.")
