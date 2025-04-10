@@ -52,23 +52,25 @@ manifest = AgentManifest(
         ],
         env_vars=[EnvVar(name="AZURE_OPENAI_API_KEY", desc="Azure key for the OpenAI service"),
                   EnvVar(name="AZURE_OPENAI_ENDPOINT", desc="Azure endpoint for the OpenAI service"),
+                  EnvVar(name="AZURE_OPENAI_MODEL", desc="AZURE OPENAI MODEL"),
+                  EnvVar(name="OPENAI_API_VERSION", desc="OPENAI_API_VERSION")
                     ],
         dependencies=[
             AgentDependency(
                 name="intention-analyzer",
-                ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url=AnyUrl("file://intentionanalyzer.json")),
+                ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url="../../intention_analyzer/deploy/intentionanalyzer.json"),
                 deployment_option = None,
                 env_var_values = None
             ),
             AgentDependency(
-                name="prompt-analyzer",
-                ref=AgentRef(name="org.agntcy.prompt-analyzer", version="0.0.1", url=AnyUrl("file://promptanalyzer.json")),
+                name="jailbreak-prompt-analyzer",
+                ref=AgentRef(name="org.agntcy.jailbreak-prompt-analyzer", version="0.0.1", url="../../jailbreak_judge/deploy/jailbreakjudge.json"),
                 deployment_option = None,
                 env_var_values = None
             ),
            AgentDependency(
                 name="jailbreak-judge",
-                ref=AgentRef(name="org.agntcy.jailbreak-judge", version="0.0.1", url=AnyUrl("file://jailbreakjudge.json")),
+                ref=AgentRef(name="org.agntcy.jailbreak-judge", version="0.0.1", url="../../jailbreak_prompt_analyzer/deploy/jailbreakpromptanalyzer.json"),
                 deployment_option = None,
                 env_var_values = None
             )
