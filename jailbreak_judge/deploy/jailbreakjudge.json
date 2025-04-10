@@ -1,10 +1,10 @@
 {
   "metadata": {
     "ref": {
-      "name": "org.agntcy.jailbreak-judge",
+      "name": "jailbreak-judge",
       "version": "0.0.1"
     },
-    "description": "This agent classifies a prompt as malicious or benign based on the analysis provided by it's counterpart agents.          Final output is on of the two tags : \"VALID\" or \"INVALID\" followed by an explanation"
+    "description": "This agent classifies a prompt as malicious or benign based on the analysis provided by it's counterpart agents.Final output is on of the two tags : \"VALID\" or \"INVALID\" followed by an explanation"
   },
   "specs": {
     "capabilities": {
@@ -217,8 +217,8 @@
     "deployment_options": [
       {
         "type": "source_code",
-        "name": "source_code_local",
-        "url": "file://../",
+        "name": "jailbreak-judge",
+        "url": "https://github.com/melidriscisco/local-sandbox-sentinel007/tree/main/jailbreak_judge",
         "framework_config": {
           "framework_type": "langgraph",
           "graph": "jailbreak_judge.jailbreak_judge:graph"
@@ -243,6 +243,24 @@
         "name": "OPENAI_API_VERSION"
       }
     ],
-    "dependencies": []
+    "dependencies": [
+      {
+        "name": "intention-analyzer",
+        "ref": {
+          "name": "intention-analyzer",
+          "version": "0.0.1",
+          "url": "../../intention_analyzer/deploy/intentionanalyzer.json"
+        }
+      },
+      {
+        "name": "jailbreak-prompt-analyzer",
+        "ref": {
+          "name": "jailbreak-prompt-analyzer",
+          "version": "0.0.1",
+          "url": "../../intention_analyzer/deploy/jailbreakpromptanalyzer.json"
+        }
+      }
+
+    ]
   }
 }
