@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "jailbreak_prompt_analyzer"
-version = "0.1.0"
+name = "jailbreak-prompt-analyzer"
+version = "0.0.1"
 description = "A tool for analyzing jailbreak prompts."
-authors = ["Sentinel Being <@cisco.com>"]
+authors = ["AnushaSuresh <anusures@cisco.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
@@ -15,7 +15,6 @@ python-dotenv = "^1.0.1"
 
 [tool.poetry.group.manifest.dependencies]
 agntcy_acp = "v0.1.0a2"
-
 
 [build-system]
 requires = ["poetry-core"]

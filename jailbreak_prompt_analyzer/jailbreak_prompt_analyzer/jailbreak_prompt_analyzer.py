@@ -100,10 +100,10 @@ def prompt_analyzer_agent(state: AgentState) -> OutputState | AgentState:
 
 # Create the graph and add the agent node
 graph_builder = StateGraph(AgentState, output=OutputState)
-graph_builder.add_node("prompt_analyzer_agent", prompt_analyzer_agent)
+graph_builder.add_node("jailbreak_prompt_analyzer_agent", prompt_analyzer_agent)
 
-graph_builder.add_edge(START, "prompt_analyzer_agent")
-graph_builder.add_edge("prompt_analyzer_agent", END)
+graph_builder.add_edge(START, "jailbreak_prompt_analyzer_agent")
+graph_builder.add_edge("jailbreak_prompt_analyzer_agent", END)
 
 # Compile the graph
 graph = graph_builder.compile()
