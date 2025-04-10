@@ -1,0 +1,857 @@
+{
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.sentinel007",
+      "version": "0.0.1"
+    },
+    "description": "Jailbreak Defense Agent"
+  },
+  "specs": {
+    "capabilities": {
+      "threads": false,
+      "interrupts": false,
+      "callbacks": false
+    },
+    "input": {
+      "$defs": {
+        "IntentionAnalyzerState": {
+          "properties": {
+            "input": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__intention_analyzer__InputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "output": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__intention_analyzer__OutputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "title": "IntentionAnalyzerState",
+          "type": "object"
+        },
+        "JudgeState": {
+          "properties": {
+            "input": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_judge__InputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "output": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_judge__OutputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "title": "JudgeState",
+          "type": "object"
+        },
+        "Message": {
+          "properties": {
+            "type": {
+              "$ref": "#/$defs/Type",
+              "description": "indicates the originator of the message, a human or an assistant"
+            },
+            "content": {
+              "description": "the content of the message",
+              "title": "Content",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "content"
+          ],
+          "title": "Message",
+          "type": "object"
+        },
+        "PromptAnalyzerState": {
+          "properties": {
+            "input": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_prompt_analyzer__InputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "output": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "title": "PromptAnalyzerState",
+          "type": "object"
+        },
+        "TargetAudience": {
+          "enum": [
+            "general",
+            "technical",
+            "business",
+            "academic"
+          ],
+          "title": "TargetAudience",
+          "type": "string"
+        },
+        "Type": {
+          "enum": [
+            "human",
+            "assistant",
+            "ai"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "sentinel007_agent__intention_analyzer__InputSchema": {
+          "properties": {
+            "messages": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Message"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Messages"
+            },
+            "is_completed": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Is Completed"
+            }
+          },
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__intention_analyzer__OutputSchema": {
+          "properties": {
+            "messages": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Message"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Messages"
+            },
+            "is_completed": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Is Completed"
+            },
+            "final_email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Final intent of the user",
+              "title": "Final intent"
+            }
+          },
+          "title": "OutputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_judge__InputSchema": {
+          "properties": {
+            "intent": {
+              "description": "The email content to be reviewed and corrected",
+              "title": "Email",
+              "type": "string"
+            }
+          },
+          "required": [
+            "intent"
+          ],
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_judge__OutputSchema": {
+          "properties": {
+            "correct": {
+              "description": "Indicates whether the email is correct and requires no changes",
+              "title": "Correct",
+              "type": "boolean"
+            },
+            "corrected_email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The corrected version of the email, if changes were necessary",
+              "title": "Corrected Email"
+            }
+          },
+          "required": [
+            "correct"
+          ],
+          "title": "OutputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_prompt_analyzer__InputSchema": {
+          "properties": {
+            "email": {
+              "description": "The email content to be reviewed and corrected",
+              "title": "Email",
+              "type": "string"
+            },
+            "target_audience": {
+              "$ref": "#/$defs/TargetAudience",
+              "description": "The target audience for the email, affecting the style of review"
+            }
+          },
+          "required": [
+            "email",
+            "target_audience"
+          ],
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema": {
+          "properties": {
+            "correct": {
+              "description": "Indicates whether the email is correct and requires no changes",
+              "title": "Correct",
+              "type": "boolean"
+            },
+            "corrected_email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The corrected version of the email, if changes were necessary",
+              "title": "Corrected Email"
+            }
+          },
+          "required": [
+            "correct"
+          ],
+          "title": "OutputSchema",
+          "type": "object"
+        }
+      },
+      "properties": {
+        "messages": {
+          "default": [],
+          "description": "Chat messages",
+          "items": {
+            "$ref": "#/$defs/Message"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "has_intention_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Has Intention Completed"
+        },
+        "has_prompt_analyzer_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Has Prompt Analyzer Completed"
+        },
+        "has_judge_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Has Judge Completed"
+        },
+        "has_sender_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Has Sender Completed"
+        },
+        "intention_analyzer_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IntentionAnalyzerState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "prompt_analyzer_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PromptAnalyzerState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "judge_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JudgeState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "OverallState",
+      "type": "object"
+    },
+    "output": {
+      "$defs": {
+        "IntentionAnalyzerState": {
+          "properties": {
+            "input": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__intention_analyzer__InputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "output": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__intention_analyzer__OutputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "title": "IntentionAnalyzerState",
+          "type": "object"
+        },
+        "JudgeState": {
+          "properties": {
+            "input": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_judge__InputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "output": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_judge__OutputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "title": "JudgeState",
+          "type": "object"
+        },
+        "Message": {
+          "properties": {
+            "type": {
+              "$ref": "#/$defs/Type",
+              "description": "indicates the originator of the message, a human or an assistant"
+            },
+            "content": {
+              "description": "the content of the message",
+              "title": "Content",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "content"
+          ],
+          "title": "Message",
+          "type": "object"
+        },
+        "PromptAnalyzerState": {
+          "properties": {
+            "input": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_prompt_analyzer__InputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "output": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "title": "PromptAnalyzerState",
+          "type": "object"
+        },
+        "TargetAudience": {
+          "enum": [
+            "general",
+            "technical",
+            "business",
+            "academic"
+          ],
+          "title": "TargetAudience",
+          "type": "string"
+        },
+        "Type": {
+          "enum": [
+            "human",
+            "assistant",
+            "ai"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "sentinel007_agent__intention_analyzer__InputSchema": {
+          "properties": {
+            "messages": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Message"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Messages"
+            },
+            "is_completed": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Is Completed"
+            }
+          },
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__intention_analyzer__OutputSchema": {
+          "properties": {
+            "messages": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Message"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Messages"
+            },
+            "is_completed": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Is Completed"
+            },
+            "final_email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Final intent of the user",
+              "title": "Final intent"
+            }
+          },
+          "title": "OutputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_judge__InputSchema": {
+          "properties": {
+            "intent": {
+              "description": "The email content to be reviewed and corrected",
+              "title": "Email",
+              "type": "string"
+            }
+          },
+          "required": [
+            "intent"
+          ],
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_judge__OutputSchema": {
+          "properties": {
+            "correct": {
+              "description": "Indicates whether the email is correct and requires no changes",
+              "title": "Correct",
+              "type": "boolean"
+            },
+            "corrected_email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The corrected version of the email, if changes were necessary",
+              "title": "Corrected Email"
+            }
+          },
+          "required": [
+            "correct"
+          ],
+          "title": "OutputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_prompt_analyzer__InputSchema": {
+          "properties": {
+            "email": {
+              "description": "The email content to be reviewed and corrected",
+              "title": "Email",
+              "type": "string"
+            },
+            "target_audience": {
+              "$ref": "#/$defs/TargetAudience",
+              "description": "The target audience for the email, affecting the style of review"
+            }
+          },
+          "required": [
+            "email",
+            "target_audience"
+          ],
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema": {
+          "properties": {
+            "correct": {
+              "description": "Indicates whether the email is correct and requires no changes",
+              "title": "Correct",
+              "type": "boolean"
+            },
+            "corrected_email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The corrected version of the email, if changes were necessary",
+              "title": "Corrected Email"
+            }
+          },
+          "required": [
+            "correct"
+          ],
+          "title": "OutputSchema",
+          "type": "object"
+        }
+      },
+      "properties": {
+        "messages": {
+          "default": [],
+          "description": "Chat messages",
+          "items": {
+            "$ref": "#/$defs/Message"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "has_intention_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Has Intention Completed"
+        },
+        "has_prompt_analyzer_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Has Prompt Analyzer Completed"
+        },
+        "has_judge_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Has Judge Completed"
+        },
+        "has_sender_completed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Has Sender Completed"
+        },
+        "intention_analyzer_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IntentionAnalyzerState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "prompt_analyzer_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PromptAnalyzerState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "judge_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JudgeState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "OverallState",
+      "type": "object"
+    },
+    "config": {
+      "properties": {
+        "recipient_email_address": {
+          "description": "Email address of the email recipient",
+          "title": "Recipient Email Address",
+          "type": "string"
+        },
+        "sender_email_address": {
+          "description": "Email address of the email sender",
+          "title": "Sender Email Address",
+          "type": "string"
+        }
+      },
+      "required": [
+        "recipient_email_address",
+        "sender_email_address"
+      ],
+      "title": "ConfigModel",
+      "type": "object"
+    }
+  },
+  "deployment": {
+    "deployment_options": [
+      {
+        "type": "source_code",
+        "name": "source_code_local",
+        "url": "file://../",
+        "framework_config": {
+          "framework_type": "langgraph",
+          "graph": "sentinel007_agent.app:graph"
+        }
+      }
+    ],
+    "env_vars": [
+      {
+        "desc": "Azure key for the OpenAI service",
+        "name": "AZURE_OPENAI_API_KEY"
+      },
+      {
+        "desc": "Azure endpoint for the OpenAI service",
+        "name": "AZURE_OPENAI_ENDPOINT"
+      }
+    ],
+    "dependencies": [
+      {
+        "name": "intention-analyzer",
+        "ref": {
+          "name": "org.agntcy.intention-analyzer",
+          "version": "0.0.1",
+          "url": "file://intentionanalyzer.json/"
+        }
+      },
+      {
+        "name": "prompt-analyzer",
+        "ref": {
+          "name": "org.agntcy.prompt-analyzer",
+          "version": "0.0.1",
+          "url": "file://promptanalyzer.json/"
+        }
+      },
+      {
+        "name": "jailbreak-judge",
+        "ref": {
+          "name": "org.agntcy.jailbreak-judge",
+          "version": "0.0.1",
+          "url": "file://jailbreakjudge.json/"
+        }
+      }
+    ]
+  }
+}
