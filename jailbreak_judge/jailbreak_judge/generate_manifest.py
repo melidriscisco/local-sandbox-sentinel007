@@ -19,8 +19,9 @@ from agntcy_acp.manifest import (
 
 manifest = AgentManifest(
     metadata=AgentMetadata(
-        ref=AgentRef(name="org.agntcy.mailcomposer", version="0.0.1", url=None),
-        description="Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"),
+        ref=AgentRef(name="org.agntcy.jailbreak-judge", version="0.0.1", url=None),
+        description="This agent classifies a prompt as malicious or benign based on the analysis provided by it's counterpart agents. \
+         Final output is on of the two tags : \"VALID\" or \"INVALID\" followed by an explanation"),
     specs=AgentACPSpec(
         input=AgentState.model_json_schema(),
         output=OutputState.model_json_schema(),
@@ -44,20 +45,22 @@ manifest = AgentManifest(
                     url=AnyUrl("file://../"),
                     framework_config=LangGraphConfig(
                         framework_type="langgraph",
-                        graph="mailcomposer.mailcomposer:graph"
+                        graph="jailbreak_judge.jailbreak_judge:graph"
                     )
                 )
             )
         ],
         env_vars=[
             EnvVar(name="AZURE_OPENAI_API_KEY", desc="Azure key for the OpenAI service"),
-            EnvVar(name="AZURE_OPENAI_ENDPOINT", desc="Azure endpoint for the OpenAI service")
+            EnvVar(name="AZURE_OPENAI_ENDPOINT", desc="Azure endpoint for the OpenAI service"),
+            EnvVar(name="AZURE_OPENAI_MODEL", desc="AZURE OPENAI MODEL"),
+            EnvVar(name="OPENAI_API_VERSION", desc="OPENAI_API_VERSION")
             ],
         dependencies=[]
     )
 )
 
-with open(f"{Path(__file__).parent}/../deploy/mailcomposer.json", "w") as f:
+with open(f"{Path(__file__).parent}/../deploy/jailbreakjudge.json", "w") as f:
     f.write(manifest.model_dump_json(
         exclude_unset=True,
         exclude_none=True,
