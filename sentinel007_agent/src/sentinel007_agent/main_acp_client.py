@@ -27,7 +27,7 @@ async def main():
     client_config = ApiClientConfiguration.fromEnvPrefix("MARKETING_CAMPAIGN_")
 
     while True:
-        usermsg = input("YOU [Type OK when you are happy with the email proposed] >>> ")
+        usermsg = input("YOU >>> ")
         inputState.messages.append(IntentionAnalyzerState.Message(content=usermsg, type=IntentionAnalyzerState.Type.human))
         run_create = RunCreateStateless(
             agent_id=sentinel_id,

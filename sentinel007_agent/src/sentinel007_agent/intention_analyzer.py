@@ -29,11 +29,7 @@ class Message(BaseModel):
 class OutputSchema(BaseModel):
     messages: Optional[List[Message]] = Field(None, title='Messages')
     is_completed: Optional[bool] = Field(None, title='Is Completed')
-    final_email: Optional[str] = Field(
-        None,
-        description='Final intent of the user',
-        title='Final intent',
-    )
+    final_intent: Optional[str] = Field(default=None, description="Final intent produced by the intent_analyzer.")
 
 
 class Type(Enum):

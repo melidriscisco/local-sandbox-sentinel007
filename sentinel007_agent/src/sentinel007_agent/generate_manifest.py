@@ -59,6 +59,7 @@ manifest = AgentManifest(
             AgentDependency(
                 name="intention-analyzer",
                 ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url="../../intention_analyzer/deploy/intentionanalyzer.json"),
+                # ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url=AnyUrl("file://intentionanalyzer.json")),
                 deployment_option = None,
                 env_var_values = None
             ),
