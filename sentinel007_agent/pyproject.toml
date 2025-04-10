@@ -1,9 +1,15 @@
 [project]
-name = "marketing-campaign"
-version = "0.1.0"
+name = "sentinel007_agent"
+version = "0.0.1"
 description = ""
 authors = [
-    {name = "Alessandro Duminuco",email = "aduminuc@cisco.com"}
+    {name = "Aditya Ramesh",email = "aditrame@cisco.com"},
+    {name = "Akanksha Joshi",email = "akanjosh@cisco.com"},
+    {name = "Anusha Suresh",email = "anusuresh@cisco.com"},
+    {name = "Mohamed Elidrisi",email = "melidris@cisco.com"},
+    {name = "Sindhu Narasarama Rao",email = "snarasar@cisco.com"},
+    {name = "Sree Gowri Addepalli",email = "sreeadde@cisco.com"},
+    {name = "Suresh Yekasiri",email = "syekasir@cisco.com"}
 ]
 readme = "README.md"
 requires-python =  ">=3.9.0,<4.0"
@@ -18,7 +24,7 @@ agntcy-acp = "1.1.2"
 
 
 [tool.poetry]
-packages = [{include = "marketing_campaign", from = "src"}]
+packages = [{include = "sentinel007_agent", from = "src"}]
 
 
 [build-system]
