@@ -1,0 +1,224 @@
+{
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.jailbreak-prompt-analyzer",
+      "version": "0.0.1"
+    },
+    "description": "This agent analyzes the prompt intent and generates 3 different prompts that could've led to the              given response, for the judge to take a call on the validity of the prompt. The final output is a list of prompts "
+  },
+  "specs": {
+    "capabilities": {
+      "threads": false,
+      "interrupts": false,
+      "callbacks": false
+    },
+    "input": {
+      "$defs": {
+        "Message": {
+          "properties": {
+            "type": {
+              "$ref": "#/$defs/Type",
+              "description": "indicates the originator of the message, a human or an assistant"
+            },
+            "content": {
+              "description": "the content of the message",
+              "title": "Content",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "content"
+          ],
+          "title": "Message",
+          "type": "object"
+        },
+        "Type": {
+          "enum": [
+            "human",
+            "assistant",
+            "ai"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "messages": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Message"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Messages"
+        },
+        "unfiltered_llm_response": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unfiltered Llm Response"
+        },
+        "intention_analyzer_output": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intention Analyzer Output"
+        }
+      },
+      "title": "AgentState",
+      "type": "object"
+    },
+    "output": {
+      "$defs": {
+        "Message": {
+          "properties": {
+            "type": {
+              "$ref": "#/$defs/Type",
+              "description": "indicates the originator of the message, a human or an assistant"
+            },
+            "content": {
+              "description": "the content of the message",
+              "title": "Content",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "content"
+          ],
+          "title": "Message",
+          "type": "object"
+        },
+        "Type": {
+          "enum": [
+            "human",
+            "assistant",
+            "ai"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "messages": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Message"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Messages"
+        },
+        "unfiltered_llm_response": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unfiltered Llm Response"
+        },
+        "intention_analyzer_output": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intention Analyzer Output"
+        },
+        "prompt_analyzer_output": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "List of prompts tom produce same LLM response.",
+          "title": "Prompt Analyzer Output"
+        }
+      },
+      "title": "OutputState",
+      "type": "object"
+    },
+    "config": {
+      "properties": {
+        "test": {
+          "title": "Test",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "test"
+      ],
+      "title": "ConfigSchema",
+      "type": "object"
+    }
+  },
+  "deployment": {
+    "deployment_options": [
+      {
+        "type": "source_code",
+        "name": "source_code_local",
+        "url": "file://../",
+        "framework_config": {
+          "framework_type": "langgraph",
+          "graph": "mailcomposer.mailcomposer:graph"
+        }
+      }
+    ],
+    "env_vars": [
+      {
+        "desc": "Azure key for the OpenAI service",
+        "name": "AZURE_OPENAI_API_KEY"
+      },
+      {
+        "desc": "Azure endpoint for the OpenAI service",
+        "name": "AZURE_OPENAI_ENDPOINT"
+      },
+      {
+        "desc": "AZURE OPENAI MODEL",
+        "name": "AZURE_OPENAI_MODEL"
+      },
+      {
+        "desc": "OPENAI_API_VERSION",
+        "name": "OPENAI_API_VERSION"
+      }
+    ],
+    "dependencies": []
+  }
+}
