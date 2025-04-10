@@ -825,6 +825,14 @@
       {
         "desc": "Azure endpoint for the OpenAI service",
         "name": "AZURE_OPENAI_ENDPOINT"
+      },
+      {
+        "desc": "AZURE OPENAI MODEL",
+        "name": "AZURE_OPENAI_MODEL"
+      },
+      {
+        "desc": "OPENAI_API_VERSION",
+        "name": "OPENAI_API_VERSION"
       }
     ],
     "dependencies": [
@@ -833,15 +841,15 @@
         "ref": {
           "name": "org.agntcy.intention-analyzer",
           "version": "0.0.1",
-          "url": "file://intentionanalyzer.json/"
+          "url": "../../intention_analyzer/deploy/intentionanalyzer.json"
         }
       },
       {
-        "name": "prompt-analyzer",
+        "name": "jailbreak-prompt-analyzer",
         "ref": {
-          "name": "org.agntcy.prompt-analyzer",
+          "name": "org.agntcy.jailbreak-prompt-analyzer",
           "version": "0.0.1",
-          "url": "file://promptanalyzer.json/"
+          "url": "../../jailbreak_judge/deploy/jailbreakjudge.json"
         }
       },
       {
@@ -849,7 +857,7 @@
         "ref": {
           "name": "org.agntcy.jailbreak-judge",
           "version": "0.0.1",
-          "url": "file://jailbreakjudge.json/"
+          "url": "../../jailbreak_prompt_analyzer/deploy/jailbreakpromptanalyzer.json"
         }
       }
     ]
