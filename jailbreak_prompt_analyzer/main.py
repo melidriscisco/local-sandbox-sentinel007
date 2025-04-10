@@ -11,8 +11,8 @@ from jailbreak_prompt_analyzer.state import Message, Type as MsgType
 
 def main():
     output = OutputState(prompt_analyzer_output=None)
-    unfiltered_llm_response =  Message("",type=MsgType.human)
-    intention_analyzer_output = Message("", type = MsgType.human)
+    unfiltered_llm_response = " "
+    intention_analyzer_output = " "
     # unfiltered_llm_response = input("Please Enter the LLM response >>>")
     # intention_analyzer_output = input("Please Enter the intention analyzer output >>>")
     prompt_analyzer_input = AgentState(unfiltered_llm_response = unfiltered_llm_response,
