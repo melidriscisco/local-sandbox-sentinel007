@@ -1,0 +1,17 @@
+values:
+  AZURE_OPENAI_API_KEY: your_secret
+  AZURE_OPENAI_ENDPOINT: "the_url.com"
+  API_HOST: 0.0.0.0
+dependencies:
+  - name: intention-analyzer
+    values:
+      AZURE_OPENAI_API_KEY: your_secret
+      AZURE_OPENAI_ENDPOINT: "the_url.com"
+  - name: jailbreak-prompt-analyzer
+    values:
+      AZURE_OPENAI_API_KEY: your_secret
+      AZURE_OPENAI_ENDPOINT: "the_url.com"
+  - name: jailbreak-judge
+    values:
+      AZURE_OPENAI_API_KEY: your_secret      
+      AZURE_OPENAI_ENDPOINT: "the_url.com"
