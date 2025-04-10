@@ -10,15 +10,15 @@ from jailbreak_prompt_analyzer.state import Message, Type as MsgType
 
 
 def main():
-    output = OutputState(prompt_analyzer_output=None)
-    unfiltered_llm_response = " "
-    intention_analyzer_output = " "
-    # unfiltered_llm_response = input("Please Enter the LLM response >>>")
-    # intention_analyzer_output = input("Please Enter the intention analyzer output >>>")
-    prompt_analyzer_input = AgentState(unfiltered_llm_response = unfiltered_llm_response,
-                                       intention_analyzer_output = intention_analyzer_output)
+    # TODO: Read the variables from the sentinel agent
+    #unfiltered_llm_response = " "
+    #intention_analyzer_output = " "
+    unfiltered_llm_response = input("Please Enter the LLM response >>>")
+    intention_analyzer_output = input("Please Enter the intention analyzer output >>>")
+    prompt_analyzer_input = AgentState(unfiltered_llm_response=unfiltered_llm_response,
+                                       intention_analyzer_output=intention_analyzer_output)
     out = graph.invoke(prompt_analyzer_input, {"configurable": {"thread_id": "foo"}})
-    output:OutputState = OutputState.model_validate(out)
+    output: OutputState = OutputState.model_validate(out)
     print("The List of prompts that can produce similar LLM response : ")
     print(output.prompt_analyzer_output)
 
