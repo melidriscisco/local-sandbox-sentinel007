@@ -1,7 +1,7 @@
 {
   "metadata": {
     "ref": {
-      "name": "org.agntcy.sentinel007",
+      "name": "sentinel007",
       "version": "0.0.1"
     },
     "description": "Jailbreak Defense Agent"
@@ -117,16 +117,6 @@
           "title": "PromptAnalyzerState",
           "type": "object"
         },
-        "TargetAudience": {
-          "enum": [
-            "general",
-            "technical",
-            "business",
-            "academic"
-          ],
-          "title": "TargetAudience",
-          "type": "string"
-        },
         "Type": {
           "enum": [
             "human",
@@ -198,7 +188,7 @@
               "default": null,
               "title": "Is Completed"
             },
-            "final_email": {
+            "final_intent": {
               "anyOf": [
                 {
                   "type": "string"
@@ -208,8 +198,8 @@
                 }
               ],
               "default": null,
-              "description": "Final intent of the user",
-              "title": "Final intent"
+              "description": "Final intent produced by the intent_analyzer.",
+              "title": "Final Intent"
             }
           },
           "title": "OutputSchema",
@@ -217,26 +207,115 @@
         },
         "sentinel007_agent__jailbreak_judge__InputSchema": {
           "properties": {
-            "intent": {
-              "description": "The email content to be reviewed and corrected",
-              "title": "Email",
-              "type": "string"
+            "messages": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Message"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Messages"
+            },
+            "is_completed": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Is Completed"
+            },
+            "intent_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "",
+              "title": "Intent Analyzer Output"
+            },
+            "prompt_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "",
+              "title": "Prompt Analyzer Output"
             }
           },
-          "required": [
-            "intent"
-          ],
           "title": "InputSchema",
           "type": "object"
         },
         "sentinel007_agent__jailbreak_judge__OutputSchema": {
           "properties": {
-            "correct": {
-              "description": "Indicates whether the email is correct and requires no changes",
-              "title": "Correct",
-              "type": "boolean"
+            "messages": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Message"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Messages"
             },
-            "corrected_email": {
+            "is_completed": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Is Completed"
+            },
+            "intent_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "",
+              "title": "Intent Analyzer Output"
+            },
+            "prompt_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "",
+              "title": "Prompt Analyzer Output"
+            },
+            "final_judgement": {
               "anyOf": [
                 {
                   "type": "string"
@@ -246,43 +325,31 @@
                 }
               ],
               "default": null,
-              "description": "The corrected version of the email, if changes were necessary",
-              "title": "Corrected Email"
+              "description": "Final judgement produced by the jailbreak judge",
+              "title": "Final Judgement"
             }
           },
-          "required": [
-            "correct"
-          ],
           "title": "OutputSchema",
           "type": "object"
         },
         "sentinel007_agent__jailbreak_prompt_analyzer__InputSchema": {
           "properties": {
-            "email": {
-              "description": "The email content to be reviewed and corrected",
-              "title": "Email",
-              "type": "string"
+            "messages": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Message"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Messages"
             },
-            "target_audience": {
-              "$ref": "#/$defs/TargetAudience",
-              "description": "The target audience for the email, affecting the style of review"
-            }
-          },
-          "required": [
-            "email",
-            "target_audience"
-          ],
-          "title": "InputSchema",
-          "type": "object"
-        },
-        "sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema": {
-          "properties": {
-            "correct": {
-              "description": "Indicates whether the email is correct and requires no changes",
-              "title": "Correct",
-              "type": "boolean"
-            },
-            "corrected_email": {
+            "unfiltered_llm_response": {
               "anyOf": [
                 {
                   "type": "string"
@@ -292,13 +359,40 @@
                 }
               ],
               "default": null,
-              "description": "The corrected version of the email, if changes were necessary",
-              "title": "Corrected Email"
+              "title": "Unfiltered Llm Response"
+            },
+            "intention_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Intention Analyzer Output"
             }
           },
-          "required": [
-            "correct"
-          ],
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema": {
+          "properties": {
+            "prompt_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "List of prompts tom produce same LLM response.",
+              "title": "Prompt Analyzer Output"
+            }
+          },
           "title": "OutputSchema",
           "type": "object"
         }
@@ -503,16 +597,6 @@
           "title": "PromptAnalyzerState",
           "type": "object"
         },
-        "TargetAudience": {
-          "enum": [
-            "general",
-            "technical",
-            "business",
-            "academic"
-          ],
-          "title": "TargetAudience",
-          "type": "string"
-        },
         "Type": {
           "enum": [
             "human",
@@ -584,7 +668,7 @@
               "default": null,
               "title": "Is Completed"
             },
-            "final_email": {
+            "final_intent": {
               "anyOf": [
                 {
                   "type": "string"
@@ -594,8 +678,8 @@
                 }
               ],
               "default": null,
-              "description": "Final intent of the user",
-              "title": "Final intent"
+              "description": "Final intent produced by the intent_analyzer.",
+              "title": "Final Intent"
             }
           },
           "title": "OutputSchema",
@@ -603,26 +687,115 @@
         },
         "sentinel007_agent__jailbreak_judge__InputSchema": {
           "properties": {
-            "intent": {
-              "description": "The email content to be reviewed and corrected",
-              "title": "Email",
-              "type": "string"
+            "messages": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Message"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Messages"
+            },
+            "is_completed": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Is Completed"
+            },
+            "intent_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "",
+              "title": "Intent Analyzer Output"
+            },
+            "prompt_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "",
+              "title": "Prompt Analyzer Output"
             }
           },
-          "required": [
-            "intent"
-          ],
           "title": "InputSchema",
           "type": "object"
         },
         "sentinel007_agent__jailbreak_judge__OutputSchema": {
           "properties": {
-            "correct": {
-              "description": "Indicates whether the email is correct and requires no changes",
-              "title": "Correct",
-              "type": "boolean"
+            "messages": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Message"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Messages"
             },
-            "corrected_email": {
+            "is_completed": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Is Completed"
+            },
+            "intent_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "",
+              "title": "Intent Analyzer Output"
+            },
+            "prompt_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "",
+              "title": "Prompt Analyzer Output"
+            },
+            "final_judgement": {
               "anyOf": [
                 {
                   "type": "string"
@@ -632,43 +805,31 @@
                 }
               ],
               "default": null,
-              "description": "The corrected version of the email, if changes were necessary",
-              "title": "Corrected Email"
+              "description": "Final judgement produced by the jailbreak judge",
+              "title": "Final Judgement"
             }
           },
-          "required": [
-            "correct"
-          ],
           "title": "OutputSchema",
           "type": "object"
         },
         "sentinel007_agent__jailbreak_prompt_analyzer__InputSchema": {
           "properties": {
-            "email": {
-              "description": "The email content to be reviewed and corrected",
-              "title": "Email",
-              "type": "string"
+            "messages": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/Message"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Messages"
             },
-            "target_audience": {
-              "$ref": "#/$defs/TargetAudience",
-              "description": "The target audience for the email, affecting the style of review"
-            }
-          },
-          "required": [
-            "email",
-            "target_audience"
-          ],
-          "title": "InputSchema",
-          "type": "object"
-        },
-        "sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema": {
-          "properties": {
-            "correct": {
-              "description": "Indicates whether the email is correct and requires no changes",
-              "title": "Correct",
-              "type": "boolean"
-            },
-            "corrected_email": {
+            "unfiltered_llm_response": {
               "anyOf": [
                 {
                   "type": "string"
@@ -678,13 +839,40 @@
                 }
               ],
               "default": null,
-              "description": "The corrected version of the email, if changes were necessary",
-              "title": "Corrected Email"
+              "title": "Unfiltered Llm Response"
+            },
+            "intention_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Intention Analyzer Output"
             }
           },
-          "required": [
-            "correct"
-          ],
+          "title": "InputSchema",
+          "type": "object"
+        },
+        "sentinel007_agent__jailbreak_prompt_analyzer__OutputSchema": {
+          "properties": {
+            "prompt_analyzer_output": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "List of prompts tom produce same LLM response.",
+              "title": "Prompt Analyzer Output"
+            }
+          },
           "title": "OutputSchema",
           "type": "object"
         }
@@ -786,20 +974,13 @@
     },
     "config": {
       "properties": {
-        "recipient_email_address": {
-          "description": "Email address of the email recipient",
-          "title": "Recipient Email Address",
-          "type": "string"
-        },
-        "sender_email_address": {
-          "description": "Email address of the email sender",
-          "title": "Sender Email Address",
-          "type": "string"
+        "test": {
+          "title": "Test",
+          "type": "boolean"
         }
       },
       "required": [
-        "recipient_email_address",
-        "sender_email_address"
+        "test"
       ],
       "title": "ConfigModel",
       "type": "object"
@@ -809,8 +990,8 @@
     "deployment_options": [
       {
         "type": "source_code",
-        "name": "source_code_local",
-        "url": "file://../",
+        "name": "sentinel007",
+        "url": "https://github.com/melidriscisco/local-sandbox-sentinel007.git//sentinel007_agent",
         "framework_config": {
           "framework_type": "langgraph",
           "graph": "sentinel007_agent.app:graph"
@@ -825,31 +1006,39 @@
       {
         "desc": "Azure endpoint for the OpenAI service",
         "name": "AZURE_OPENAI_ENDPOINT"
+      },
+      {
+        "desc": "AZURE OPENAI MODEL",
+        "name": "AZURE_OPENAI_MODEL"
+      },
+      {
+        "desc": "OPENAI_API_VERSION",
+        "name": "OPENAI_API_VERSION"
       }
     ],
     "dependencies": [
       {
         "name": "intention-analyzer",
         "ref": {
-          "name": "org.agntcy.intention-analyzer",
+          "name": "intention-analyzer",
           "version": "0.0.1",
-          "url": "file://intentionanalyzer.json/"
+          "url": "../intention_analyzer/deploy/intentionanalyzer.json"
         }
       },
       {
-        "name": "prompt-analyzer",
+        "name": "jailbreak-prompt-analyzer",
         "ref": {
-          "name": "org.agntcy.prompt-analyzer",
+          "name": "jailbreak-prompt-analyzer",
           "version": "0.0.1",
-          "url": "file://promptanalyzer.json/"
+          "url": "../jailbreak_prompt_analyzer/deploy/jailbreakpromptanalyzer.json"
         }
       },
       {
         "name": "jailbreak-judge",
         "ref": {
-          "name": "org.agntcy.jailbreak-judge",
+          "name": "jailbreak-judge",
           "version": "0.0.1",
-          "url": "file://jailbreakjudge.json/"
+          "url": "../jailbreak_judge/deploy/jailbreakjudge.json"
         }
       }
     ]

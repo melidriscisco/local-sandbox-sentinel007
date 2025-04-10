@@ -8,8 +8,9 @@ from langchain_core.messages import  AIMessage, HumanMessage
 from sentinel007_agent import intention_analyzer, jailbreak_judge, jailbreak_prompt_analyzer
 
 class ConfigModel(BaseModel):
-    recipient_email_address: str = Field(..., description="Email address of the email recipient")
-    sender_email_address: str = Field(..., description="Email address of the email sender")
+    test: bool
+    # recipient_email_address: str = Field(..., description="Email address of the email recipient")
+    # sender_email_address: str = Field(..., description="Email address of the email sender")
     # target_audience: email_reviewer.TargetAudience = Field(..., description="Target audience for the marketing campaign")
 
 class IntentionAnalyzerState(BaseModel):

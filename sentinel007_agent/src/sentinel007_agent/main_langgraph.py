@@ -5,7 +5,7 @@ import asyncio
 from sentinel007_agent.app import graph
 from sentinel007_agent.state import OverallState, ConfigModel, IntentionAnalyzerState
 # from marketing_campaign.email_reviewer import TargetAudience
-from langchain_core.runnables.config import RunnableConfig
+# from langchain_core.runnables.config import RunnableConfig
 
 
 async def main():
@@ -16,16 +16,9 @@ async def main():
         has_composer_completed=False
     )
     while True:
-        usermsg = input("YOU [Type OK when you are happy with the email proposed] >>> ")
+        usermsg = input("YOU >>> ")
         inputState.messages.append(IntentionAnalyzerState.Message(content=usermsg, type=IntentionAnalyzerState.Type.human))
-        output = await graph.ainvoke(inputState, RunnableConfig(
-            configurable=ConfigModel(
-                recipient_email_address=os.environ["RECIPIENT_EMAIL_ADDRESS"],
-                sender_email_address=os.environ["SENDER_EMAIL_ADDRESS"],
-                # target_audience=TargetAudience.academic
-            ).model_dump()
-        )
-)
+        output = await graph.ainvoke(inputState)
 
         outputState = OverallState.model_validate(output)
         if len(outputState.operation_logs) > 0:

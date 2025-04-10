@@ -244,23 +244,6 @@
       }
     ],
     "dependencies": [
-      {
-        "name": "intention-analyzer",
-        "ref": {
-          "name": "intention-analyzer",
-          "version": "0.0.1",
-          "url": "../../intention_analyzer/deploy/intentionanalyzer.json"
-        }
-      },
-      {
-        "name": "jailbreak-prompt-analyzer",
-        "ref": {
-          "name": "jailbreak-prompt-analyzer",
-          "version": "0.0.1",
-          "url": "../../intention_analyzer/deploy/jailbreakpromptanalyzer.json"
-        }
-      }
-
     ]
   }
 }

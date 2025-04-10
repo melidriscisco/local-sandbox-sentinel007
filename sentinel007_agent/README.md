@@ -1,11 +1,11 @@
-# Marketing Campaign Manager
+# Sentinel007
 
-The **Marketing Campaign Manager** is a demonstration AI application developed with LangGraph. It assists in composing and sending emails for marketing campaigns by interacting with multiple AI agents. This guide will walk you through the steps to set up and run the example application locally.
+The **Sentinel007** is a demonstration AI application developed with LangGraph. It is a Multi-Agent Application that will prevent jailbreaking of a LLM. This guide will walk you through the steps to set up and run the example application locally.
 
 ## Features
 
 * It gathers necessary campaign details from the user through a chat.
-* Compose an email leveraging the [Email Composer Agent](../mailcomposer/) as a remote ACP agent.
+* Determines the intent of the user prompt using the Intent Analyzer Agent as a remote ACP agent.
 * It leverages the [IO Mapper Agent](https://github.com/agntcy/iomapper-agnt) to adapt Email Composer Agent output to Email Reviewer Agent.
 * Reviews the email leveraging the [Email Reviewer Agent](../email_reviewer/) as a remote ACP agent.
 * Send the email to the configured recipient through Twilio sendgrid leveraging the [API Bridge Agent](https://github.com/agntcy/api-bridge-agnt)
@@ -124,7 +124,7 @@ curl http://localhost:8080/tyk/reload/group \
 
 ---
 
-## Running the Marketing Campaign Manager
+## Running the Sentinel007 Agent
 
 The Marketing Campaign Manager application can be run in two ways:
 1. Using the **ACP client**.
@@ -136,7 +136,7 @@ An [IO Mapper Agent](https://github.com/agntcy/iomapper-agnt) is used in the app
 
 The **ACP client** or **LangGraph** applications handle communication with the Marketing Campaign application, which orchestrates interactions with the dependent agents.
 
-All commands and scripts should be executed from the `examples/marketing-campaign` directory, where this guide is located.
+All commands and scripts should be executed from the `sentinel007_agent` directory, where this guide is located.
 
 ### Prerequisites for Both Methods
 
@@ -144,9 +144,9 @@ Before running the application, ensure the following prerequisites are met:
 
 1. **Bridge Agent**: The API Bridge Agent must be running as explained in Step 4 of the setup instructions.
 2. **`wfsm` CLI**: The Workflow Server Manager CLI (`wfsm`) must be added to your system's PATH.
-3. **Dependencies**: Install Python dependencies in the `examples/marketing-campaign` directory:
+3. **Dependencies**: Install Python dependencies in the `sentinel007_agent` directory:
    ```sh
-   cd examples/marketing-campaign
+   cd sentinel007_agent
    poetry install
    ```
 
@@ -154,12 +154,12 @@ Before running the application, ensure the following prerequisites are met:
 
 ### Method 1: Using the ACP Client
 
-This method demonstrates how to communicate with the Marketing Campaign application using the **ACP (Agent Connect Protocol) client**. The workflow server for the Marketing Campaign application must be started manually. Once running, it will automatically launch the workflow servers for its dependencies, **MailComposer** and **EmailReviewer**, as defined in the deployment configuration of the [marketing-campaign manifest](./deploy/marketing-campaign.json).
+This method demonstrates how to communicate with the Sentinel007 application using the **ACP (Agent Connect Protocol) client**. The workflow server for the Sentinel007 application must be started manually. Once running, it will automatically launch the workflow servers for its dependencies, **IntentAnalyzer**, **JailbreakPromptAnalyzer** and **JailbreakJudge**, as defined in the deployment configuration of the [sentinel007 manifest](./deploy/sentinel007.json).
 
 #### Steps:
 
 1. **Configure the Agents**:
-   Before starting the workflow server, provide the necessary configurations for the agents. Open the `./deploy/marketing_campaign_example.yaml` file located in the `deploy` folder and update the following values with your configuration:
+   Before starting the workflow server, provide the necessary configurations for the agents. Open the `./deploy/sentinel007.yaml` file located in the `deploy` folder and update the following values with your configuration:
 
    ```yaml
    values:
@@ -180,9 +180,9 @@ This method demonstrates how to communicate with the Marketing Campaign applicat
    ```
 
 2. **Start the Workflow Server**:
-   Run the following command to deploy the Marketing Campaign workflow server:
+   Run the following command to deploy the Sentinel007 workflow server:
    ```sh
-   wfsm deploy -m ./deploy/marketing-campaign.json -e ./deploy/marketing_campaign_example.yaml -b workflowserver:latest
+   wfsm deploy -m ./deploy/sentinel007.json -e ./deploy/sentinel007.yaml -b workflowserver:latest
    ```
 
    If everything is set up correctly, the application will start, and the logs will display:
@@ -192,12 +192,13 @@ This method demonstrates how to communicate with the Marketing Campaign applicat
 
    Example log output:
    ```plaintext
-   2025-03-28T12:31:04+01:00 INF ---------------------------------------------------------------------
-   2025-03-28T12:31:04+01:00 INF ACP agent deployment name: org.agntcy.marketing-campaign
-   2025-03-28T12:31:04+01:00 INF ACP agent running in container: org.agntcy.marketing-campaign, listening for ACP request on: http://127.0.0.1:62609
-   2025-03-28T12:31:04+01:00 INF Agent ID: eae32ada-aaf8-408c-bf0c-7654455ce6e3
-   2025-03-28T12:31:04+01:00 INF API Key: 08817517-7000-48e9-94d8-01d22cf7d20a
-   2025-03-28T12:31:04+01:00 INF ---------------------------------------------------------------------
+2025-04-09T19:57:39-07:00 INF ---------------------------------------------------------------------
+2025-04-09T19:57:39-07:00 INF ACP agent deployment name: org.agntcy.sentinel007
+2025-04-09T19:57:39-07:00 INF ACP agent running in container: org.agntcy.sentinel007, listening for ACP requests on: http://127.0.0.1:57259
+2025-04-09T19:57:39-07:00 INF Agent ID: 9f4a6a1b-b266-4a16-ad95-f0756efbb39a
+2025-04-09T19:57:39-07:00 INF API Key: a2b34263-1910-46b3-81c0-cd76adbe9256
+2025-04-09T19:57:39-07:00 INF API Docs: http://127.0.0.1:57259/agents/9f4a6a1b-b266-4a16-ad95-f0756efbb39a/docs
+2025-04-09T19:57:39-07:00 INF ---------------------------------------------------------------------
    ```
 
 3. **Export Environment Variables**:
@@ -206,19 +207,13 @@ This method demonstrates how to communicate with the Marketing Campaign applicat
    export MARKETING_CAMPAIGN_HOST="http://localhost:62609"
    export MARKETING_CAMPAIGN_ID="eae32ada-aaf8-408c-bf0c-7654455ce6e3"
    export MARKETING_CAMPAIGN_API_KEY='{"x-api-key": "08817517-7000-48e9-94d8-01d22cf7d20a"}'
-
-   # Configuration of the application
-   export RECIPIENT_EMAIL_ADDRESS="recipient@example.com"
-   export SENDER_EMAIL_ADDRESS="sender@example.com" # Sender email address as configured in Sendgrid
    ```
 
 4. **Run the Application**:
-   Start the Marketing Campaign Manager application using the ACP client:
+   Start the Sentinel007 application using the ACP client:
    ```sh
-   poetry run python src/marketing_campaign/main_acp_client.py
+   poetry run python src/sentinel007_agent/main_acp_client.py
    ```
-
-   Interact with the application via ACP Client to compose and review emails. Once approved, the email will be sent to the recipient via SendGrid.
 ---
 
 ### Method 2: Using LangGraph

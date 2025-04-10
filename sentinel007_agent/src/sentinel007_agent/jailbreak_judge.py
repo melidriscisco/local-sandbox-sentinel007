@@ -8,31 +8,38 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field, RootModel
 
 
-class ConfigSchema(RootModel[Any]):
-    root: Any = Field(..., title='ConfigSchema')
+class ConfigSchema(BaseModel):
+    test: bool
+
+class Type(Enum):
+    human = 'human'
+    assistant = 'assistant'
+    ai = 'ai'
+
+class Message(BaseModel):
+    type: Type = Field(
+        ...,
+        description='indicates the originator of the message, a human or an assistant',
+    )
+    content: str = Field(..., description='the content of the message')
 
 
 class InputSchema(BaseModel):
-    intent: str = Field(
-        ..., description='The email content to be reviewed and corrected', title='Email'
-    )
+    # intent: str = Field(
+    #     ..., description='The email content to be reviewed and corrected', title='Email'
+    # )
     # target_audience: TargetAudience = Field(
     #     ...,
     #     description='The target audience for the email, affecting the style of review',
     # )
+    messages: Optional[list[Message]] = None
+    is_completed: Optional[bool] = None
+    intent_analyzer_output: Optional[str] = ""
+    prompt_analyzer_output: Optional[str] = ""
 
+class OutputSchema(InputSchema):
+    final_judgement: Optional[str] = Field(default=None, description="Final judgement produced by the jailbreak judge")
 
-class OutputSchema(BaseModel):
-    correct: bool = Field(
-        ...,
-        description='Indicates whether the email is correct and requires no changes',
-        title='Correct',
-    )
-    corrected_email: Optional[str] = Field(
-        None,
-        description='The corrected version of the email, if changes were necessary',
-        title='Corrected Email',
-    )
 
 
 # class TargetAudience(Enum):
