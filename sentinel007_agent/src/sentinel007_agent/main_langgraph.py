@@ -13,7 +13,7 @@ async def main():
     inputState = OverallState(
         messages=[],
         operation_logs=[],
-        has_composer_completed=False
+        has_intention_completed=False
     )
     while True:
         usermsg = input("YOU >>> ")

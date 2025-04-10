@@ -16,6 +16,8 @@ class ConfigSchema(BaseModel):
 class InputSchema(BaseModel):
     messages: Optional[List[Message]] = Field(None, title='Messages')
     is_completed: Optional[bool] = Field(None, title='Is Completed')
+    session_id: Optional[str] = None
+    agent_id: Optional[str] = None
 
 
 class Message(BaseModel):

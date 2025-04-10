@@ -43,7 +43,7 @@ def process_inputs(state: state.OverallState, config: RunnableConfig) -> state.O
     state.intention_analyzer_state = IntentionAnalyzerState(
         input=intention_analyzer.InputSchema(
             messages=copy.deepcopy(state.messages),
-            is_completed=state.has_composer_completed
+            is_completed=state.has_intention_completed
         )
 
     )
