@@ -14,8 +14,8 @@ from agntcy_acp.manifest import (
     SourceCodeDeployment,
     LangGraphConfig,
     EnvVar,
+    AgentDependency
 )
-
 
 manifest = AgentManifest(
     metadata=AgentMetadata(
@@ -39,13 +39,13 @@ manifest = AgentManifest(
     deployment=AgentDeployment(
         deployment_options=[
             DeploymentOptions(
-                root = SourceCodeDeployment(
+                root=SourceCodeDeployment(
                     type="source_code",
-                    name="source_code_local",
-                    url=AnyUrl("file://../"),
+                    name="jailbreak-prompt-analyzer",
+                    url=AnyUrl("https://github.com/melidriscisco/local-sandbox-sentinel007/tree/main/jailbreak_prompt_analyzer"),
                     framework_config=LangGraphConfig(
                         framework_type="langgraph",
-                        graph="mailcomposer.mailcomposer:graph"
+                        graph="jailbreak_prompt_analyzer.jailbreak_prompt_analyzer:graph"
                     )
                 )
             )
@@ -55,8 +55,17 @@ manifest = AgentManifest(
             EnvVar(name="AZURE_OPENAI_ENDPOINT", desc="Azure endpoint for the OpenAI service"),
             EnvVar(name="AZURE_OPENAI_MODEL", desc="AZURE OPENAI MODEL"),
             EnvVar(name="OPENAI_API_VERSION", desc="OPENAI_API_VERSION")
-            ],
-        dependencies=[]
+        ],
+        dependencies=[
+            AgentDependency(
+                name="intention-analyzer",
+                ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1",
+                             url="../../intention_analyzer/deploy/intentionanalyzer.json"),
+                # ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url=AnyUrl("file://intentionanalyzer.json")),
+                deployment_option=None,
+                env_var_values=None
+            )
+        ]
     )
 )
 

@@ -4,7 +4,8 @@
       "name": "org.agntcy.jailbreak-prompt-analyzer",
       "version": "0.0.1"
     },
-    "description": "This agent analyzes the prompt intent and generates 3 different prompts that could've led to the              given response, for the judge to take a call on the validity of the prompt. The final output is a list of prompts "
+    "description": "This agent analyzes the prompt intent and generates 3 different prompts that could've led to the iven response, for the judge to take a call on the validity of the prompt. The final output is a list of prompts"
+
   },
   "specs": {
     "capabilities": {
@@ -193,11 +194,11 @@
     "deployment_options": [
       {
         "type": "source_code",
-        "name": "source_code_local",
-        "url": "file://../",
+        "name": "jailbreak-prompt-analyzer",
+        "url": "https://github.com/melidriscisco/local-sandbox-sentinel007/tree/main/jailbreak_prompt_analyzer",
         "framework_config": {
           "framework_type": "langgraph",
-          "graph": "mailcomposer.mailcomposer:graph"
+          "graph": "jailbreak_prompt_analyzer.jailbreak_prompt_analyzer:graph"
         }
       }
     ],
@@ -219,6 +220,15 @@
         "name": "OPENAI_API_VERSION"
       }
     ],
-    "dependencies": []
+    "dependencies": [
+      {
+        "name": "intention-analyzer",
+        "ref": {
+          "name": "org.agntcy.intention-analyzer",
+          "version": "0.0.1",
+          "url": "../../intention_analyzer/deploy/intentionanalyzer.json"
+        }
+      }
+    ]
   }
 }

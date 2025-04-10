@@ -41,8 +41,8 @@ manifest = AgentManifest(
             DeploymentOptions(
                 root = SourceCodeDeployment(
                     type="source_code",
-                    name="source_code_local",
-                    url=AnyUrl("file://../"),
+                    name="intention-analyzer",
+                    url=AnyUrl("https://github.com/melidriscisco/local-sandbox-sentinel007/tree/main/intention_analyzer"),
                     framework_config=LangGraphConfig(
                         framework_type="langgraph",
                         graph="intention_analyzer.intention_analyzer:graph"
