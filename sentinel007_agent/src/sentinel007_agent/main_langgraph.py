@@ -2,14 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 import os
 import asyncio
-from sentinel007.app import graph
-from sentinel007.state import OverallState, ConfigModel, IntentionAnalyzerState
+from sentinel007_agent.app import graph
+from sentinel007_agent.state import OverallState, ConfigModel, IntentionAnalyzerState
 # from marketing_campaign.email_reviewer import TargetAudience
 from langchain_core.runnables.config import RunnableConfig
 
 
 async def main():
-    print("What marketing campaign do you want to create?")
+    print("What do you want to ask the agent?")
     inputState = OverallState(
         messages=[],
         operation_logs=[],

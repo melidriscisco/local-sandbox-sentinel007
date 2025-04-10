@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from pathlib import Path
 from pydantic import AnyUrl
-from sentinel007.state import OverallState, ConfigModel
+from sentinel007_agent.state import OverallState, ConfigModel
 from agntcy_acp.manifest import (
     AgentManifest,
     AgentDeployment,
@@ -45,30 +45,30 @@ manifest = AgentManifest(
                     url=AnyUrl("file://../"),
                     framework_config=LangGraphConfig(
                         framework_type="langgraph",
-                        graph="sentinel007.app:graph"
+                        graph="sentinel007_agent.app:graph"
                     )
                 )
             )
         ],
         env_vars=[EnvVar(name="AZURE_OPENAI_API_KEY", desc="Azure key for the OpenAI service"),
                   EnvVar(name="AZURE_OPENAI_ENDPOINT", desc="Azure endpoint for the OpenAI service"),
-                  EnvVar(name="SENDGRID_API_KEY", desc="Sendgrid API key")],
+                    ],
         dependencies=[
             AgentDependency(
-                name="mailcomposer",
+                name="intention-analyzer",
                 ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url=AnyUrl("file://intentionanalyzer.json")),
                 deployment_option = None,
                 env_var_values = None
             ),
             AgentDependency(
-                name="email_reviewer",
+                name="prompt-analyzer",
                 ref=AgentRef(name="org.agntcy.prompt-analyzer", version="0.0.1", url=AnyUrl("file://promptanalyzer.json")),
                 deployment_option = None,
                 env_var_values = None
             ),
            AgentDependency(
-                name="email_reviewer",
-                ref=AgentRef(name="org.agntcy.judge", version="0.0.1", url=AnyUrl("file://judge.json")),
+                name="jailbreak-judge",
+                ref=AgentRef(name="org.agntcy.jailbreak-judge", version="0.0.1", url=AnyUrl("file://jailbreakjudge.json")),
                 deployment_option = None,
                 env_var_values = None
             )
@@ -76,7 +76,7 @@ manifest = AgentManifest(
     )
 )
 
-with open(f"{Path(__file__).parent}/../../deploy/sentinel007.json", "w") as f:
+with open(f"{Path(__file__).parent}/../deploy/sentinel007.json", "w") as f:
     f.write(manifest.model_dump_json(
         exclude_unset=True,
         exclude_none=True,
