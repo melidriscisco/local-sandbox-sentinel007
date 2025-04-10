@@ -218,7 +218,7 @@
       {
         "type": "source_code",
         "name": "jailbreak-judge",
-        "url": "https://github.com/melidriscisco/local-sandbox-sentinel007/tree/main/jailbreak_judge",
+        "url": "https://github.com/melidriscisco/local-sandbox-sentinel007.git//jailbreak_judge",
         "framework_config": {
           "framework_type": "langgraph",
           "graph": "jailbreak_judge.jailbreak_judge:graph"
