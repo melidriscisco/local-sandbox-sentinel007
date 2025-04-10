@@ -1,7 +1,7 @@
 {
   "metadata": {
     "ref": {
-      "name": "org.agntcy.jailbreak-prompt-analyzer",
+      "name": "jailbreak-prompt-analyzer",
       "version": "0.0.1"
     },
     "description": "This agent analyzes the prompt intent and generates 3 different prompts that could've led to the iven response, for the judge to take a call on the validity of the prompt. The final output is a list of prompts"

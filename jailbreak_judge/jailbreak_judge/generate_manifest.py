@@ -14,12 +14,13 @@ from agntcy_acp.manifest import (
     SourceCodeDeployment,
     LangGraphConfig,
     EnvVar,
+    AgentDependency
 )
 
 
 manifest = AgentManifest(
     metadata=AgentMetadata(
-        ref=AgentRef(name="org.agntcy.jailbreak-judge", version="0.0.1", url=None),
+        ref=AgentRef(name="jailbreak-judge", version="0.0.1", url=None),
         description="This agent classifies a prompt as malicious or benign based on the analysis provided by it's counterpart agents. \
          Final output is on of the two tags : \"VALID\" or \"INVALID\" followed by an explanation"),
     specs=AgentACPSpec(
@@ -41,8 +42,8 @@ manifest = AgentManifest(
             DeploymentOptions(
                 root = SourceCodeDeployment(
                     type="source_code",
-                    name="source_code_local",
-                    url=AnyUrl("file://../"),
+                    name="jailbreak-judge",
+                    url=AnyUrl("https://github.com/melidriscisco/local-sandbox-sentinel007/tree/main/jailbreak_judge"),
                     framework_config=LangGraphConfig(
                         framework_type="langgraph",
                         graph="jailbreak_judge.jailbreak_judge:graph"
@@ -56,7 +57,24 @@ manifest = AgentManifest(
             EnvVar(name="AZURE_OPENAI_MODEL", desc="AZURE OPENAI MODEL"),
             EnvVar(name="OPENAI_API_VERSION", desc="OPENAI_API_VERSION")
             ],
-        dependencies=[]
+        dependencies=[
+            AgentDependency(
+                name="intention-analyzer",
+                ref=AgentRef(name="intention-analyzer", version="0.0.1",
+                             url="../../intention_analyzer/deploy/intentionanalyzer.json"),
+                # ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url=AnyUrl("file://intentionanalyzer.json")),
+                deployment_option=None,
+                env_var_values=None
+            ),
+            AgentDependency(
+                name="jailbreak-prompt-analyzer",
+                ref=AgentRef(name="jailbreak-prompt-analyzer", version="0.0.1",
+                             url="../../intention_analyzer/deploy/jailbreakpromptanalyzer.json"),
+                # ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url=AnyUrl("file://intentionanalyzer.json")),
+                deployment_option=None,
+                env_var_values=None
+            )
+        ]
     )
 )
 

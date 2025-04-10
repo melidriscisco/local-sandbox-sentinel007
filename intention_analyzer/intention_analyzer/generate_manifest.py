@@ -20,7 +20,7 @@ from agntcy_acp.manifest import (
 
 manifest = AgentManifest(
     metadata=AgentMetadata(
-        ref=AgentRef(name="org.agntcy.intention-analyzer", version="0.0.1", url=None),
+        ref=AgentRef(name="intention-analyzer", version="0.0.1", url=None),
         description= "Analyzes the intent of a given text. Final output is the intent that could be used to be passed to the Judge."),
     specs=AgentACPSpec(
         input=AgentState.model_json_schema(),
