@@ -7,11 +7,17 @@ import copy
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.state import CompiledStateGraph
 from agntcy_acp.langgraph.acp_node import ACPNode
+from agntcy_acp.langgraph.io_mapper import add_io_mapped_edge
 from agntcy_acp import ApiClientConfiguration
 from langchain_core.runnables.graph import MermaidDrawMethod
 from langchain_core.runnables import RunnableConfig
 from langchain_openai.chat_models.azure import AzureChatOpenAI
-from sentinel007_agent import intention_analyzer, state, jailbreak_judge, jailbreak_prompt_analyzer
+from sentinel007_agent import (
+    intention_analyzer,
+    state,
+    jailbreak_judge,
+    jailbreak_prompt_analyzer,
+)
 from sentinel007_agent.state import IntentionAnalyzerState
 
 
@@ -19,16 +25,22 @@ from sentinel007_agent.state import IntentionAnalyzerState
 INTENTION_ANALYZER_AGENT_ID = os.environ.get("INTENTION_ANALYZER_ID", "")
 PROMPT_ANALYZER_AGENT_ID = os.environ.get("PROMPT_ANALYZER_ID", "")
 JAILBREAK_JUDGE_AGENT_ID = os.environ.get("JAILBREAK_JUDGE_ID", "")
-INTENTION_ANALYZER_CLIENT_CONFIG = ApiClientConfiguration.fromEnvPrefix("INTENTION_ANALYZER_")
+INTENTION_ANALYZER_CLIENT_CONFIG = ApiClientConfiguration.fromEnvPrefix(
+    "INTENTION_ANALYZER_"
+)
 PROMPT_ANALYZER_CLIENT_CONFIG = ApiClientConfiguration.fromEnvPrefix("PROMPT_ANALYZER_")
 JAILBREAK_JUDGE_CLIENT_CONFIG = ApiClientConfiguration.fromEnvPrefix("JAILBREAK_JUDGE_")
 
 # Set to True to generate a mermaid graph
-GENERATE_MERMAID_GRAPH = os.environ.get("GENERATE_MERMAID_GRAPH", "False").lower() == "true"
+GENERATE_MERMAID_GRAPH = (
+    os.environ.get("GENERATE_MERMAID_GRAPH", "False").lower() == "true"
+)
 
 
-def process_inputs(state: state.OverallState, config: RunnableConfig) -> state.OverallState:
-    cfg = config.get('configurable', {})
+def process_inputs(
+    state: state.OverallState, config: RunnableConfig
+) -> state.OverallState:
+    cfg = config.get("configurable", {})
 
     # user_message = state.messages[-1].content
 
@@ -43,18 +55,22 @@ def process_inputs(state: state.OverallState, config: RunnableConfig) -> state.O
     state.intention_analyzer_state = IntentionAnalyzerState(
         input=intention_analyzer.InputSchema(
             messages=copy.deepcopy(state.messages),
-            is_completed=state.has_intention_completed
+            is_completed=state.has_intention_completed,
         )
-
     )
     return state
 
 
 def check_final_response(state: state.OverallState):
-    return "done" if (state.judge_state
-                      and state.judge_state.output
-                      and state.judge_state.output.final_judgement
-                      ) else "user"
+    return (
+        "done"
+        if (
+            state.judge_state
+            and state.judge_state.output
+            and state.judge_state.output.final_judgement
+        )
+        else "user"
+    )
 
 
 def build_graph() -> CompiledStateGraph:
@@ -73,7 +89,7 @@ def build_graph() -> CompiledStateGraph:
         input_path="intention_analyzer_state.input",
         input_type=intention_analyzer.InputSchema,
         output_path="intention_analyzer_state.output",
-        output_type=intention_analyzer.OutputSchema
+        output_type=intention_analyzer.OutputSchema,
     )
     acp_prompt_analyzer = ACPNode(
         name="jailbreak_prompt_analyzer",
@@ -82,7 +98,7 @@ def build_graph() -> CompiledStateGraph:
         input_path="jailbreak_prompt_analyzer_state.input",
         input_type=jailbreak_prompt_analyzer.InputSchema,
         output_path="jailbreak_prompt_analyzer_state.output",
-        output_type=jailbreak_prompt_analyzer.OutputSchema
+        output_type=jailbreak_prompt_analyzer.OutputSchema,
     )
     acp_judge = ACPNode(
         name="jailbreak_judge",
@@ -91,7 +107,7 @@ def build_graph() -> CompiledStateGraph:
         input_path="jailbreak_judge_state.input",
         input_type=jailbreak_judge.InputSchema,
         output_path="jailbreak_judge_state.output",
-        output_type=jailbreak_judge.OutputSchema
+        output_type=jailbreak_judge.OutputSchema,
     )
 
     # Create the state graph
@@ -102,21 +118,34 @@ def build_graph() -> CompiledStateGraph:
     sg.add_node(acp_intention_analyzer)
     sg.add_node(acp_prompt_analyzer)
     sg.add_node(acp_judge)
-
     # Add edges
     sg.add_edge(START, "process_inputs")
     sg.add_edge("process_inputs", acp_intention_analyzer.get_name())
     sg.add_edge(acp_intention_analyzer.get_name(), acp_prompt_analyzer.get_name())
+    add_io_mapped_edge(
+        sg,
+        start=acp_intention_analyzer,
+        end=acp_prompt_analyzer,
+        llm=llm,
+    )
     sg.add_edge(acp_prompt_analyzer.get_name(), acp_judge.get_name())
+    add_io_mapped_edge(
+        sg,
+        start=acp_prompt_analyzer,
+        end=acp_judge,
+        llm=llm,
+    )
     sg.add_edge(acp_judge.get_name(), END)
 
     g = sg.compile()
     g.name = "Sentinel 007"
     if GENERATE_MERMAID_GRAPH:
         with open("___graph.png", "wb") as f:
-            f.write(g.get_graph().draw_mermaid_png(
-                draw_method=MermaidDrawMethod.API,
-            ))
+            f.write(
+                g.get_graph().draw_mermaid_png(
+                    draw_method=MermaidDrawMethod.API,
+                )
+            )
     return g
 
 
