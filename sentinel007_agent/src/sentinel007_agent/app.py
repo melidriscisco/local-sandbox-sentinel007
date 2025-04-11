@@ -18,7 +18,7 @@ from sentinel007_agent import (
     jailbreak_judge,
     jailbreak_prompt_analyzer,
 )
-from sentinel007_agent.state import IntentionAnalyzerState
+from sentinel007_agent.state import IntentionAnalyzerState, PromptAnalyzerState, JudgeState
 
 
 # Fill in client configuration for the remote agent
@@ -51,12 +51,34 @@ def process_inputs(
     state.has_intention_completed = True
 
     # state.target_audience = email_reviewer.TargetAudience(cfg["target_audience"])
-
+    print("from app:",state.messages)
     state.intention_analyzer_state = IntentionAnalyzerState(
         input=intention_analyzer.InputSchema(
             messages=copy.deepcopy(state.messages),
             is_completed=state.has_intention_completed,
         )
+    )
+    state.jailbreak_prompt_analyzer_state = PromptAnalyzerState(
+        input=jailbreak_prompt_analyzer.InputSchema(
+            unfiltered_llm_response=copy.deepcopy(state.messages[-1].content)
+    )
+    )
+
+    # state.jailbreak_prompt_analyzer_state = PromptAnalyzerState(
+    #     input=jailbreak_prompt_analyzer.InputSchema(
+    #         intention_analyzer_output="",
+    # )
+    # )
+    state.jailbreak_judge_state = JudgeState(
+        input=jailbreak_judge.InputSchema(
+            prompt_analyzer_output=state.jailbreak_prompt_analyzer_state.output,
+    )
+    )
+    state.jailbreak_judge_state = JudgeState(
+        input=jailbreak_judge.InputSchema(
+            prompt_analyzer_output=state.jailbreak_prompt_analyzer_state.output,
+            intent_analyzer_output=state.intention_analyzer_state.output,
+    )
     )
     return state
 
