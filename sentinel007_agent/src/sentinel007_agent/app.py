@@ -18,7 +18,11 @@ from sentinel007_agent import (
     jailbreak_judge,
     jailbreak_prompt_analyzer,
 )
-from sentinel007_agent.state import IntentionAnalyzerState, PromptAnalyzerState, JudgeState
+from sentinel007_agent.state import (
+    IntentionAnalyzerState,
+    PromptAnalyzerState,
+    JudgeState,
+)
 
 
 # Fill in client configuration for the remote agent
@@ -51,7 +55,7 @@ def process_inputs(
     state.has_intention_completed = True
 
     # state.target_audience = email_reviewer.TargetAudience(cfg["target_audience"])
-    print("from app:",state.messages)
+    print("from app:", state.messages)
     state.intention_analyzer_state = IntentionAnalyzerState(
         input=intention_analyzer.InputSchema(
             messages=copy.deepcopy(state.messages),
@@ -60,8 +64,9 @@ def process_inputs(
     )
     state.jailbreak_prompt_analyzer_state = PromptAnalyzerState(
         input=jailbreak_prompt_analyzer.InputSchema(
-            unfiltered_llm_response=copy.deepcopy(state.messages[-1].content)
-    )
+            unfiltered_llm_response=copy.deepcopy(state.messages[-1].content),
+            intention_analyzer_output=state.intention_analyzer_state.output,
+        )
     )
 
     # state.jailbreak_prompt_analyzer_state = PromptAnalyzerState(
@@ -71,15 +76,15 @@ def process_inputs(
     # )
     state.jailbreak_judge_state = JudgeState(
         input=jailbreak_judge.InputSchema(
-            prompt_analyzer_output=state.jailbreak_prompt_analyzer_state.output,
+            prompt_analyzer_output="",
+        )
     )
-    )
-    state.jailbreak_judge_state = JudgeState(
-        input=jailbreak_judge.InputSchema(
-            prompt_analyzer_output=state.jailbreak_prompt_analyzer_state.output,
-            intent_analyzer_output=state.intention_analyzer_state.output,
-    )
-    )
+    # state.jailbreak_judge_state = JudgeState(
+    #     input=jailbreak_judge.InputSchema(
+    #         prompt_analyzer_output=state.jailbreak_prompt_analyzer_state.output,
+    #         intent_analyzer_output=state.intention_analyzer_state.output,
+    #     )
+    # )
     return state
 
 
@@ -144,35 +149,35 @@ def build_graph() -> CompiledStateGraph:
     sg.add_edge(START, "process_inputs")
     sg.add_edge("process_inputs", acp_intention_analyzer.get_name())
     sg.add_edge(acp_intention_analyzer.get_name(), acp_prompt_analyzer.get_name())
-    add_io_mapped_edge(
-        sg,
-        start=acp_intention_analyzer,
-        end=acp_prompt_analyzer,
-        iomapper_config={
-            "input_fields": ["intention_analyzer_state.output.final_intent"],
-            "output_fields": [
-                "jailbreak_prompt_analyzer_state.input.intention_analyzer_output"
-            ],
-        },
-        llm=llm,
-    )
+    # add_io_mapped_edge(
+    #     sg,
+    #     start=acp_intention_analyzer,
+    #     end=acp_prompt_analyzer,
+    #     iomapper_config={
+    #         "input_fields": ["intention_analyzer_state.output.final_intent"],
+    #         "output_fields": [
+    #             "jailbreak_prompt_analyzer_state.input.intention_analyzer_output"
+    #         ],
+    #     },
+    #     llm=llm,
+    # )
     sg.add_edge(acp_prompt_analyzer.get_name(), acp_judge.get_name())
-    add_io_mapped_edge(
-        sg,
-        start=acp_prompt_analyzer,
-        end=acp_judge,
-        iomapper_config={
-            "input_fields": [
-                "jailbreak_prompt_analyzer_state.output.prompt_analyzer_output",
-                # "jailbreak_prompt_analyzer_state.output.prompt_analyzer_output"
-            ],
-            "output_fields": [
-                "jailbreak_judge_state.input.prompt_analyzer_output",
-                # "jailbreak_judge_state.input.intent_analyzer_output"
-            ],
-        },
-        llm=llm,
-    )
+    # add_io_mapped_edge(
+    #     sg,
+    #     start=acp_prompt_analyzer,
+    #     end=acp_judge,
+    #     iomapper_config={
+    #         "input_fields": [
+    #             "jailbreak_prompt_analyzer_state.output.prompt_analyzer_output",
+    #             "jailbreak_prompt_analyzer_state.output.prompt_analyzer_output",
+    #         ],
+    #         "output_fields": [
+    #             "jailbreak_judge_state.input.prompt_analyzer_output",
+    #             "jailbreak_judge_state.input.intent_analyzer_output",
+    #         ],
+    #     },
+    #     llm=llm,
+    # )
     sg.add_edge(acp_judge.get_name(), END)
 
     g = sg.compile()
