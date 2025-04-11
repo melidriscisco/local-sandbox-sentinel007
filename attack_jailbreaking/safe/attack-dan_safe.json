@@ -1,0 +1,10 @@
+[
+    {
+        "name": "0",
+        "raw_response": "A cryptocurrency blockchain is a decentralized digital ledger that records all transactions across a network of computers. It consists of blocks, each containing a list of transactions, a timestamp, and a cryptographic hash of the previous block, ensuring continuity. This structure creates an immutable chain that is transparent and secure. Miners, or validators, use consensus algorithms like Proof of Work or Proof of Stake to verify and add new blocks. Once a block is validated and added, it is difficult to alter, providing security against fraud. Blockchain technology enables trustless, peer-to-peer transactions without the need for intermediaries."
+    },
+    {
+        "name": "1",
+        "raw_response": "To set up a basic home Wi-Fi network, follow these steps: First, choose a suitable location for your router, ideally central and elevated. Connect your router to the modem using an Ethernet cable. Plug the router into a power source and turn it on. Use a computer or smartphone to connect to the router's default Wi-Fi network. Access the router's settings through a web browser by entering its IP address (usually found in the manual). Set up a secure network name (SSID) and password. Save your settings and reconnect your devices to the new Wi-Fi network."
+    }
+]
