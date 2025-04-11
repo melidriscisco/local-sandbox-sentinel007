@@ -11,32 +11,31 @@ from sentinel007_agent import intention_analyzer, jailbreak_judge, jailbreak_pro
 
 
 async def main():
-    print("What do you want to ask the agent?")
     session_uuid = str(uuid.uuid4())
-    print("Session UUID:", session_uuid)
     sentinel_id = os.environ.get("SENTINEL007_ID", "")
-    print("sentinel_id",sentinel_id)
     inputState = OverallState(
         messages=[],
         operation_logs=[],
-        has_intention_completed=False,
+        has_intention_completed=True,
         has_prompt_analyzer_completed=False,
         has_judge_completed=False,
         session_id= session_uuid,
         agent_id= sentinel_id
     )
     while True:
-        usermsg = input("YOU >>> ")
-        # inputState.messages.append(IntentionAnalyzerState.Message(content=usermsg, type=IntentionAnalyzerState.Type.human))
-        print("sekljfnvwe;klnvkwev:",inputState.messages)
+        usermsg = input("Please Enter your prompt to the LLM : \n")
+        if usermsg == "OK":
+            print("Thank you for using Sentinel007 !!")
+            exit()
         inputState.messages.append(intention_analyzer.Message(content=usermsg, type=intention_analyzer.Type.human))
         output = await graph.ainvoke(inputState)
-
         outputState = OverallState.model_validate(output)
-
-        print(outputState.messages[-1].content)
+        judge_output =outputState.jailbreak_judge_state.output.final_judgement.split("\n")[0].split(":")[1].strip()
+        if judge_output == "INVALID":
+            print("The given prompt looks like a jailbreaking attempt so Sentinel blocks to response")
+        else:
+            print("The given prompt is not jailbreaking so Sentinel allows the response")
         inputState = outputState
-        print("WOHOOO")
 
 if __name__ == "__main__":
     asyncio.run(main())

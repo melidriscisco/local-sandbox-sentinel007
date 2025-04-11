@@ -40,7 +40,6 @@ class OverallState(BaseModel):
     has_intention_completed: Optional[bool] = None
     has_prompt_analyzer_completed: Optional[bool] = None
     has_judge_completed: Optional[bool] = None
-    has_sender_completed: Optional[bool] = None
     intention_analyzer_state: Optional[IntentionAnalyzerState] = None
     jailbreak_prompt_analyzer_state: Optional[PromptAnalyzerState] = None
     jailbreak_judge_state: Optional[JudgeState] = None
