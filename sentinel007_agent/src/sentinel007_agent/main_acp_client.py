@@ -41,15 +41,12 @@ async def main():
             input=inputState.model_dump(),
             config=Config()
         )
-        print("run_create: ", run_create)
         async with AsyncApiClient(configuration=client_config) as api_client:
             acp_client = AsyncACPClient(api_client=api_client)
             run_output = await acp_client.create_and_wait_for_stateless_run_output(run_create)
-            print("run_output: ", run_output)
             if run_output.output is None:
                 raise Exception("Run output is None")
             actual_output = run_output.output.actual_instance
-            print("actual_output: ", actual_output)
             if isinstance(actual_output, RunResult):
                 run_result: RunResult = actual_output
             elif isinstance(actual_output, RunError):
