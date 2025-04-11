@@ -3,7 +3,7 @@
 import os
 import json
 import copy
-
+from agntcy_iomapper import IOMappingAgent, IOMappingAgentMetadata
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.state import CompiledStateGraph
 from agntcy_acp.langgraph.acp_node import ACPNode
@@ -126,6 +126,7 @@ def build_graph() -> CompiledStateGraph:
         sg,
         start=acp_intention_analyzer,
         end=acp_prompt_analyzer,
+        iomapper_config=IOMappingAgentMetadata(),
         llm=llm,
     )
     sg.add_edge(acp_prompt_analyzer.get_name(), acp_judge.get_name())
@@ -133,6 +134,7 @@ def build_graph() -> CompiledStateGraph:
         sg,
         start=acp_prompt_analyzer,
         end=acp_judge,
+        iomapper_config=IOMappingAgentMetadata(),
         llm=llm,
     )
     sg.add_edge(acp_judge.get_name(), END)
