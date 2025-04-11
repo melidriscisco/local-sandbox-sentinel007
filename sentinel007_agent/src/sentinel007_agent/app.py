@@ -126,7 +126,12 @@ def build_graph() -> CompiledStateGraph:
         sg,
         start=acp_intention_analyzer,
         end=acp_prompt_analyzer,
-        iomapper_config=IOMappingAgentMetadata(),
+        iomapper_config={
+            "input_fields": ["intention_analyzer_state.output.final_intent"],
+            "output_fields": [
+                "jailbreak_prompt_analyzer_state.input.intention_analyzer_output"
+            ],
+        },
         llm=llm,
     )
     sg.add_edge(acp_prompt_analyzer.get_name(), acp_judge.get_name())
@@ -134,7 +139,16 @@ def build_graph() -> CompiledStateGraph:
         sg,
         start=acp_prompt_analyzer,
         end=acp_judge,
-        iomapper_config=IOMappingAgentMetadata(),
+        iomapper_config={
+            "input_fields": [
+                "jailbreak_prompt_analyzer_state.output.prompt_analyzer_output",
+                # "jailbreak_prompt_analyzer_state.output.prompt_analyzer_output"
+            ],
+            "output_fields": [
+                "jailbreak_judge_state.input.prompt_analyzer_output",
+                # "jailbreak_judge_state.input.intent_analyzer_output"
+            ],
+        },
         llm=llm,
     )
     sg.add_edge(acp_judge.get_name(), END)
