@@ -8,17 +8,17 @@ from pydantic import BaseModel, Field
 
 
 class Type(Enum):
-    human = 'human'
-    assistant = 'assistant'
-    ai = 'ai'
+    human = "human"
+    assistant = "assistant"
+    ai = "ai"
 
 
 class Message(BaseModel):
     type: Type = Field(
         ...,
-        description='indicates the originator of the message, a human or an assistant',
+        description="indicates the originator of the message, a human or an assistant",
     )
-    content: str = Field(..., description='the content of the message')
+    content: str = Field(..., description="the content of the message")
 
 
 class ConfigSchema(BaseModel):
@@ -26,11 +26,14 @@ class ConfigSchema(BaseModel):
 
 
 class AgentState(BaseModel):
-    messages: Optional[List[Message]] = None
+    # messages: Optional[List[Message]] = None
     unfiltered_llm_response: Optional[str] = None
     intention_analyzer_output: Optional[str] = None
-    #is_completed: Optional[bool] = None
 
 
 class OutputState(AgentState):
-    prompt_analyzer_output: Optional[str] = Field(default=None, description="List of prompts tom produce same LLM response.")
+    # messages: Optional[List[Message]] = Field(None, title="Messages")
+    prompt_analyzer_output: Optional[str] = Field(
+        default=None, description="List of prompts tom produce same LLM response."
+    )
+    ia_is_completed: Optional[bool] = None
