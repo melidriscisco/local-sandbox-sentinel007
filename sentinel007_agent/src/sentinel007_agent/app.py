@@ -24,7 +24,6 @@ from sentinel007_agent.state import (
     JudgeState,
 )
 
-
 # Fill in client configuration for the remote agent
 INTENTION_ANALYZER_AGENT_ID = os.environ.get("INTENTION_ANALYZER_ID", "")
 PROMPT_ANALYZER_AGENT_ID = os.environ.get("PROMPT_ANALYZER_ID", "")
@@ -37,67 +36,49 @@ JAILBREAK_JUDGE_CLIENT_CONFIG = ApiClientConfiguration.fromEnvPrefix("JAILBREAK_
 
 # Set to True to generate a mermaid graph
 GENERATE_MERMAID_GRAPH = (
-    os.environ.get("GENERATE_MERMAID_GRAPH", "False").lower() == "true"
+        os.environ.get("GENERATE_MERMAID_GRAPH", "False").lower() == "true"
 )
 
 
-def process_inputs(
-    state: state.OverallState, config: RunnableConfig
+def process_intention_analyzer_input(
+        state: state.OverallState, config: RunnableConfig
 ) -> state.OverallState:
     cfg = config.get("configurable", {})
-
-    # user_message = state.messages[-1].content
-
-    # if user_message.upper() == "OK":
-    #     state.has_composer_completed = True
-
-    # else:
     state.has_intention_completed = True
-
-    # state.target_audience = email_reviewer.TargetAudience(cfg["target_audience"])
-    print("from app:", state.messages)
     state.intention_analyzer_state = IntentionAnalyzerState(
         input=intention_analyzer.InputSchema(
             messages=copy.deepcopy(state.messages),
             is_completed=state.has_intention_completed,
         )
     )
-    state.jailbreak_prompt_analyzer_state = PromptAnalyzerState(
-        input=jailbreak_prompt_analyzer.InputSchema(
-            unfiltered_llm_response=copy.deepcopy(state.messages[-1].content),
-            intention_analyzer_output=state.intention_analyzer_state.output,
-        )
-    )
-
-    # state.jailbreak_prompt_analyzer_state = PromptAnalyzerState(
-    #     input=jailbreak_prompt_analyzer.InputSchema(
-    #         intention_analyzer_output="",
-    # )
-    # )
-    state.jailbreak_judge_state = JudgeState(
-        input=jailbreak_judge.InputSchema(
-            prompt_analyzer_output="",
-        )
-    )
-    # state.jailbreak_judge_state = JudgeState(
-    #     input=jailbreak_judge.InputSchema(
-    #         prompt_analyzer_output=state.jailbreak_prompt_analyzer_state.output,
-    #         intent_analyzer_output=state.intention_analyzer_state.output,
-    #     )
-    # )
     return state
 
 
-def check_final_response(state: state.OverallState):
-    return (
-        "done"
-        if (
-            state.judge_state
-            and state.judge_state.output
-            and state.judge_state.output.final_judgement
+async def process_prompt_analyzer_input(
+        state: state.OverallState, config: RunnableConfig
+):
+    intent = state.intention_analyzer_state.output.final_intent
+    state.has_prompt_analyzer_completed = True
+    state.jailbreak_prompt_analyzer_state = PromptAnalyzerState(
+        input=jailbreak_prompt_analyzer.InputSchema(
+            unfiltered_llm_response=copy.deepcopy(state.messages[-1].content),
+            intention_analyzer_output=intent,
         )
-        else "user"
     )
+    return state
+
+
+def process_judge_input(state: state.OverallState, config: RunnableConfig):
+    state.has_judge_completed = True
+    prompt_analyzer_output = state.jailbreak_prompt_analyzer_state.output.prompt_analyzer_output
+    intention_analyzer_output = state.intention_analyzer_state.output.final_intent
+    state.jailbreak_judge_state = JudgeState(
+        input=jailbreak_judge.InputSchema(intent_analyzer_output=str(intention_analyzer_output),
+                                          prompt_analyzer_output=str(prompt_analyzer_output),
+                                          is_completed = state.has_judge_completed
+                                          )
+    )
+    return state
 
 
 def build_graph() -> CompiledStateGraph:
@@ -141,45 +122,21 @@ def build_graph() -> CompiledStateGraph:
     sg = StateGraph(state.OverallState)
 
     # Add nodes
-    sg.add_node(process_inputs)
+    sg.add_node("process_inputs", process_intention_analyzer_input)
     sg.add_node(acp_intention_analyzer)
+    sg.add_node("preparing prompt analyzer input", process_prompt_analyzer_input)
     sg.add_node(acp_prompt_analyzer)
+    sg.add_node("preparing judge input", process_judge_input)
     sg.add_node(acp_judge)
+    # sg.add_node("process final judgement", check_final_response)
     # Add edges
     sg.add_edge(START, "process_inputs")
     sg.add_edge("process_inputs", acp_intention_analyzer.get_name())
-    sg.add_edge(acp_intention_analyzer.get_name(), acp_prompt_analyzer.get_name())
-    # add_io_mapped_edge(
-    #     sg,
-    #     start=acp_intention_analyzer,
-    #     end=acp_prompt_analyzer,
-    #     iomapper_config={
-    #         "input_fields": ["intention_analyzer_state.output.final_intent"],
-    #         "output_fields": [
-    #             "jailbreak_prompt_analyzer_state.input.intention_analyzer_output"
-    #         ],
-    #     },
-    #     llm=llm,
-    # )
-    sg.add_edge(acp_prompt_analyzer.get_name(), acp_judge.get_name())
-    # add_io_mapped_edge(
-    #     sg,
-    #     start=acp_prompt_analyzer,
-    #     end=acp_judge,
-    #     iomapper_config={
-    #         "input_fields": [
-    #             "jailbreak_prompt_analyzer_state.output.prompt_analyzer_output",
-    #             "jailbreak_prompt_analyzer_state.output.prompt_analyzer_output",
-    #         ],
-    #         "output_fields": [
-    #             "jailbreak_judge_state.input.prompt_analyzer_output",
-    #             "jailbreak_judge_state.input.intent_analyzer_output",
-    #         ],
-    #     },
-    #     llm=llm,
-    # )
-    sg.add_edge(acp_judge.get_name(), END)
-
+    sg.add_edge(acp_intention_analyzer.get_name(), "preparing prompt analyzer input")
+    sg.add_edge("preparing prompt analyzer input", acp_prompt_analyzer.get_name())
+    sg.add_edge(acp_prompt_analyzer.get_name(), "preparing judge input")
+    sg.add_edge("preparing judge input", acp_judge.get_name())
+    # sg.add_edge(acp_judge.get_name(),"process final judgement" )
     g = sg.compile()
     g.name = "Sentinel 007"
     if GENERATE_MERMAID_GRAPH:
@@ -190,6 +147,4 @@ def build_graph() -> CompiledStateGraph:
                 )
             )
     return g
-
-
 graph = build_graph()
