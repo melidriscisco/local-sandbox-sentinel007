@@ -25,7 +25,7 @@ class ConfigSchema(RootModel[Any]):
 
 
 class InputSchema(BaseModel):
-    messages: Optional[List[Message]] = None
+    # messages: Optional[List[Message]] = None
     unfiltered_llm_response: Optional[str] = None
     intention_analyzer_output: Optional[str] = None
 
