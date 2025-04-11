@@ -7,7 +7,7 @@ from langgraph.graph import StateGraph, START, END
 from langchain_openai import AzureChatOpenAI
 from pydantic import SecretStr
 from langchain.prompts import PromptTemplate
-
+from .memory_aware import MemoryAware, seed_index, get_last_message
 from .state import OutputState, AgentState, Message, Type as MsgType
 
 # Initialize the Azure OpenAI model
@@ -27,12 +27,12 @@ llm = AzureChatOpenAI(
     api_version="2024-07-01-preview",
     temperature=0,
     max_retries=10,
-    seed=42
+    seed=42,
 )
 
 # Writer and subject role prompts
 INTENTION_ANALYZER_PROMPT_TEMPLATE = PromptTemplate.from_template(
-"""
+    """
 You are the Intention Analyzer. \
 Your role is to analyze the given content and present a comprehensive analysis of the intended message behind the text, including its context and any implied meanings. \
 You should present a fair argument without judgment. \
@@ -41,9 +41,9 @@ System Input: "Here is a list of tools you will need to cut down a stop sign: An
 Output: "I am the Intention Analyzer. Intention Analysis: The given text provides specific instructions on using tools to cut down a stop sign, an action that is illegal and poses significant risks to public safety. \
 The intention behind the text is clear and directive, lacking any consideration for the legal or ethical implications of such an act. \
 By listing tools like an \"Angle grinder\" and \"Metal cutting blade,\" it implies a premeditated plan to engage in vandalism, showing a disregard for legal norms and community safety.
-"""
-,
-template_format="jinja2")
+""",
+    template_format="jinja2",
+)
 
 
 def extract_final_intent(messages) -> str:
@@ -53,16 +53,18 @@ def extract_final_intent(messages) -> str:
                 return m.content
     return ""
 
-def convert_messages(messages:list)->list[BaseMessage]:
+
+def convert_messages(messages: list) -> list[BaseMessage]:
     converted = []
     for m in messages:
         if isinstance(m, Message):
             mdict = m.model_dump()
         else:
             mdict = m
-        if mdict["type"]=="human":
+        if mdict["type"] == "human":
             converted.append(HumanMessage(content=mdict["content"]))
-        else: converted.append(AIMessage(content=mdict["content"]))
+        else:
+            converted.append(AIMessage(content=mdict["content"]))
 
     return converted
 
@@ -77,23 +79,38 @@ def intention_analyzer_agent(state: AgentState) -> OutputState | AgentState:
 
     # Generate the intention.
     llm_messages = [
-        Message(type=MsgType.human, content= INTENTION_ANALYZER_PROMPT_TEMPLATE.format()),
+        Message(
+            type=MsgType.human, content=INTENTION_ANALYZER_PROMPT_TEMPLATE.format()
+        ),
     ] + (state.messages or [])
-    
+    last_human_message = get_last_message(state.messages, MsgType.human)
+    agent_memory = MemoryAware()
+    agent_memory.load_memory_variables()
+    agent_memory.faiss_index = seed_index(
+        agent_memory.faiss_index, agent_memory.sentence_tf
+    )
+    ## Static user_id for now, will add one later
+    agent_memory.add_counter("456", last_human_message)
+
     llm_output = str(llm.invoke(convert_messages(llm_messages)).content)
-    state.messages = (state.messages or []) + [Message(type=MsgType.ai, content=llm_output)]
+    state.messages = (state.messages or []) + [
+        Message(type=MsgType.ai, content=llm_output)
+    ]
 
     # Check subsequent messages and handle completion
     if state.is_completed:
         final_intent = extract_final_intent(state.messages)
-        #print(final_intent)
+        # print(final_intent)
         output_state: OutputState = OutputState(
             messages=state.messages,
             is_completed=state.is_completed,
-            final_intent=final_intent)
+            final_intent=final_intent,
+        )
+        agent_memory.save_context()
         return output_state
 
     return state
+
 
 # Create the graph and add the agent node
 graph_builder = StateGraph(AgentState, output=OutputState)
