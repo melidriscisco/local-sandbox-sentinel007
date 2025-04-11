@@ -65,7 +65,7 @@ async def main():
         else:
             print("The given prompt is not jailbreaking so Sentinel allows the response")
  
-            inputState = outputState
+        inputState = outputState
 
 
 
